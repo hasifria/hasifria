@@ -114,9 +114,6 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          <p className="text-center text-xs text-stone-400 mt-4">
-            קוד לבדיקה: <span className="font-mono font-bold text-stone-500">1234</span>
-          </p>
         </div>
       </main>
     </div>

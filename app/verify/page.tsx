@@ -16,11 +16,13 @@ function VerifyForm() {
   const phone = params.get("phone") ?? "";
   const isRegisterMode = params.get("mode") === "register";
 
-  const [digits, setDigits] = useState(["", "", "", ""]);
+  const [digits, setDigits] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const inputRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
@@ -44,7 +46,7 @@ function VerifyForm() {
     next[index] = value;
     setDigits(next);
     setError("");
-    if (value && index < 3) inputRefs[index + 1].current?.focus();
+    if (value && index < 5) inputRefs[index + 1].current?.focus();
   }
 
   function handleKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
@@ -52,25 +54,25 @@ function VerifyForm() {
       inputRefs[index - 1].current?.focus();
     }
     if (e.key === "ArrowRight" && index > 0) inputRefs[index - 1].current?.focus();
-    if (e.key === "ArrowLeft" && index < 3) inputRefs[index + 1].current?.focus();
+    if (e.key === "ArrowLeft" && index < 5) inputRefs[index + 1].current?.focus();
   }
 
   function handlePaste(e: React.ClipboardEvent) {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 4);
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
     if (!pasted) return;
-    const next = ["", "", "", ""];
+    const next = ["", "", "", "", "", ""];
     for (let i = 0; i < pasted.length; i++) next[i] = pasted[i];
     setDigits(next);
-    const focusIndex = Math.min(pasted.length, 3);
+    const focusIndex = Math.min(pasted.length, 5);
     inputRefs[focusIndex].current?.focus();
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const otp = digits.join("");
-    if (otp.length < 4) {
-      setError("יש להזין את כל 4 הספרות");
+    if (otp.length < 6) {
+      setError("יש להזין את כל 6 הספרות");
       return;
     }
     setError("");
@@ -95,7 +97,7 @@ function VerifyForm() {
 
     if (!res.ok) {
       setError(data.error ?? "שגיאה לא ידועה. אנא נסה שוב.");
-      setDigits(["", "", "", ""]);
+      setDigits(["", "", "", "", "", ""]);
       inputRefs[0].current?.focus();
       return;
     }
@@ -116,7 +118,7 @@ function VerifyForm() {
       body: JSON.stringify({ phone }),
     });
     setResendCooldown(30);
-    setDigits(["", "", "", ""]);
+    setDigits(["", "", "", "", "", ""]);
     setError("");
     inputRefs[0].current?.focus();
   }
@@ -136,7 +138,7 @@ function VerifyForm() {
               </div>
               <h1 className="text-2xl font-bold text-stone-900">קוד אימות</h1>
               <p className="text-stone-500 text-sm mt-2">
-                שלחנו קוד בן 4 ספרות למספר
+                שלחנו קוד בן 6 ספרות למספר
               </p>
               <p className="text-stone-800 font-semibold mt-1 dir-ltr" dir="ltr">
                 {maskPhone(phone)}
@@ -144,8 +146,8 @@ function VerifyForm() {
             </div>
 
             <form onSubmit={handleSubmit}>
-              {/* OTP boxes — LTR order: box0 box1 box2 box3 */}
-              <div className="flex justify-center gap-3 mb-2" dir="ltr">
+              {/* OTP boxes — LTR order */}
+              <div className="flex justify-center gap-2 mb-2" dir="ltr">
                 {digits.map((digit: any, i: any) => (
                   <input
                     key={i}
@@ -157,7 +159,7 @@ function VerifyForm() {
                     onChange={(e) => handleChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
                     onPaste={i === 0 ? handlePaste : undefined}
-                    className={`w-14 h-16 text-center text-2xl font-bold rounded-xl border-2 outline-none transition-all
+                    className={`w-11 h-14 text-center text-xl font-bold rounded-xl border-2 outline-none transition-all
                       ${digit ? "border-amber-500 bg-amber-50 text-amber-800" : "border-stone-200 bg-stone-50 text-stone-900"}
                       ${error ? "border-red-400 bg-red-50" : ""}
                       focus:border-amber-500 focus:ring-2 focus:ring-amber-100`}
@@ -210,10 +212,6 @@ function VerifyForm() {
               ← {isRegisterMode ? "חזור להרשמה" : "שנה מספר טלפון"}
             </button>
           </div>
-
-          <p className="text-center text-xs text-stone-400 mt-4">
-            קוד לבדיקה: <span className="font-mono font-bold text-stone-500">1234</span>
-          </p>
         </div>
       </main>
     </div>
