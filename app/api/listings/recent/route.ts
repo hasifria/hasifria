@@ -1,4 +1,12 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+
+type RecentListing = Prisma.ListingGetPayload<{
+  include: {
+    book: { select: { id: true; title: true; author: true; cover_image: true } };
+    seller: { select: { address: true; city: true } };
+  };
+}>;
 
 export async function GET() {
   try {
@@ -12,7 +20,7 @@ export async function GET() {
       take: 8,
     });
 
-    const result = listings.map((l: (typeof listings)[number]) => ({
+    const result = listings.map((l: RecentListing) => ({
       listingId: l.id,
       bookId: l.book.id,
       title: l.book.title,
