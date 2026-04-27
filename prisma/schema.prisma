@@ -61,3 +61,11 @@ enum ListingStatus {
   available
   sold
 }
+
+model CoverUpload {
+  token      String   @id
+  image_data String?  @db.Text
+  created_at DateTime @default(now())
+
+  @@map("cover_uploads")
+}
