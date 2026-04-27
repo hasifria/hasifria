@@ -136,6 +136,7 @@ export default function SellPage() {
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   // QR/SMS upload (desktop)
   const [uploadToken, setUploadToken] = useState<string | null>(null);
@@ -194,6 +195,26 @@ export default function SellPage() {
     setSearchResults([]);
     setSearchQuery("");
   };
+
+  // Debounce search on typing
+  useEffect(() => {
+    if (skipSearch || !!foundBook) return;
+    const q = searchQuery.trim();
+    if (q.length < 2) { setSearchResults([]); return; }
+    const timer = setTimeout(() => performSearch(q), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, skipSearch, foundBook, performSearch]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setSearchResults([]);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   // ── Cover image ──────────────────────────────────────────────────────────
 
@@ -320,7 +341,7 @@ export default function SellPage() {
                 <h2 className="font-bold text-stone-800">פרטי הספר</h2>
 
                 {!skipSearch && (
-                  <div>
+                  <div ref={searchContainerRef}>
                     {/* Mobile scan button */}
                     {isMobile && foundBook === undefined && searchResults.length === 0 && (
                       <button
@@ -337,74 +358,73 @@ export default function SellPage() {
                     )}
 
                     <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                      ברקוד ISBN או שם ספר
+                      שם ספר או ברקוד ISBN
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => { setSearchQuery(e.target.value); setFoundBook(undefined); setSearchResults([]); }}
-                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), performSearch(searchQuery))}
-                        placeholder="9780747532699 או ״הארי פוטר״"
-                        className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition text-sm"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => performSearch(searchQuery)}
-                        disabled={searching || !searchQuery.trim()}
-                        className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors shrink-0"
-                      >
-                        {searching ? (
-                          <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-                          </svg>
-                        ) : "חפש"}
-                      </button>
-                    </div>
 
-                    {/* Single match */}
-                    {foundBook && (
-                      <div className="mt-3 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
-                        <span className="text-emerald-600 text-lg">✓</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-stone-900 text-sm truncate">{foundBook.title}</p>
-                          <p className="text-xs text-stone-500">{foundBook.author}</p>
+                    <div className="relative">
+                      {foundBook != null ? (
+                        <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                          <span className="text-emerald-600 text-lg">✓</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-stone-900 text-sm truncate">{foundBook.title}</p>
+                            <p className="text-xs text-stone-500">{foundBook.author}</p>
+                          </div>
+                          <button type="button" onClick={resetSearch} className="text-xs text-stone-400 hover:text-stone-600 shrink-0">שנה</button>
                         </div>
-                        <button type="button" onClick={resetSearch} className="text-xs text-stone-400 hover:text-stone-600 shrink-0">שנה</button>
-                      </div>
-                    )}
+                      ) : (
+                        <>
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => { setSearchQuery(e.target.value); setSearchResults([]); }}
+                            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), performSearch(searchQuery))}
+                            placeholder="הקלד שם ספר או ברקוד ISBN"
+                            className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition text-sm"
+                          />
+                          {searching && (
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <svg className="animate-spin w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+                              </svg>
+                            </div>
+                          )}
 
-                    {/* Multiple matches */}
-                    {searchResults.length > 0 && (
-                      <div className="mt-3 border border-stone-200 rounded-xl overflow-hidden divide-y divide-stone-100">
-                        <p className="px-3 py-2 text-xs text-stone-400 bg-stone-50">{searchResults.length} תוצאות — בחר ספר:</p>
-                        {searchResults.map((b) => (
-                          <button
-                            key={b.id}
-                            type="button"
-                            onClick={() => { setFoundBook(b); setSearchResults([]); }}
-                            className="w-full flex items-center gap-3 px-3 py-3 hover:bg-amber-50 transition-colors text-right"
-                          >
-                            <div className="w-8 h-10 rounded bg-amber-100 overflow-hidden shrink-0">
-                              {b.cover_image ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={b.cover_image} alt="" className="w-full h-full object-cover" />
-                              ) : (
-                                <span className="flex items-center justify-center h-full text-lg opacity-40">📕</span>
-                              )}
+                          {searchResults.length > 0 && (
+                            <div className="absolute z-20 top-full mt-1 w-full bg-white border border-stone-200 rounded-xl shadow-lg overflow-hidden divide-y divide-stone-100">
+                              {searchResults.map((b: any) => (
+                                <button
+                                  key={b.id}
+                                  type="button"
+                                  onClick={() => { setFoundBook(b); setSearchResults([]); }}
+                                  className="w-full flex items-center gap-3 px-3 py-3 hover:bg-amber-50 transition-colors text-right"
+                                >
+                                  <div className="w-8 h-10 rounded bg-amber-100 overflow-hidden shrink-0">
+                                    {b.cover_image ? (
+                                      // eslint-disable-next-line @next/next/no-img-element
+                                      <img src={b.cover_image} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                      <span className="flex items-center justify-center h-full text-lg opacity-40">📕</span>
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0 text-right">
+                                    <p className="font-medium text-stone-900 text-sm truncate">{b.title}</p>
+                                    <p className="text-xs text-stone-400 truncate">{b.author}</p>
+                                  </div>
+                                </button>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => { setSearchResults([]); setFoundBook(null); }}
+                                className="w-full px-3 py-2.5 text-xs text-amber-600 hover:bg-amber-50 transition-colors text-right"
+                              >
+                                הספר שלי לא ברשימה — הזן ידנית
+                              </button>
                             </div>
-                            <div className="flex-1 min-w-0 text-right">
-                              <p className="font-medium text-stone-900 text-sm truncate">{b.title}</p>
-                              <p className="text-xs text-stone-400 truncate">{b.author}</p>
-                            </div>
-                          </button>
-                        ))}
-                        <button type="button" onClick={() => { setSearchResults([]); setFoundBook(null); }} className="w-full px-3 py-2.5 text-xs text-amber-600 hover:bg-amber-50 transition-colors text-right">
-                          הספר שלי לא ברשימה — הזן ידנית
-                        </button>
-                      </div>
-                    )}
+                          )}
+                        </>
+                      )}
+                    </div>
 
                     {/* Not found */}
                     {foundBook === null && searchResults.length === 0 && (
