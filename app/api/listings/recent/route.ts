@@ -1,13 +1,5 @@
 import { prisma } from "@/lib/db";
 
-type RecentListing = {
-  id: string;
-  price: { toString(): string } | number;
-  condition: string;
-  book: { id: string; title: string; author: string; cover_image: string | null };
-  seller: { address: string | null; city: string | null };
-};
-
 export async function GET() {
   try {
     const listings = await prisma.listing.findMany({
@@ -20,7 +12,8 @@ export async function GET() {
       take: 8,
     });
 
-    const result = listings.map((l: RecentListing) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = listings.map((l: any) => ({
       listingId: l.id,
       bookId: l.book.id,
       title: l.book.title,
