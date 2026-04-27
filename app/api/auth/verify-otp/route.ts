@@ -4,8 +4,6 @@ import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { prisma } from "@/lib/db";
 
-const TEST_OTP = "1234";
-
 export async function POST(req: Request) {
   try {
     let body: { otp?: unknown };
@@ -15,10 +13,10 @@ export async function POST(req: Request) {
     const otp = String(body.otp ?? "").trim();
     const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 
-    if (!session.pendingPhone) {
+    if (!session.pendingPhone || !session.pendingOtp) {
       return NextResponse.json({ error: "לא נמצאה בקשת אימות. אנא התחל מחדש." }, { status: 400 });
     }
-    if (otp !== TEST_OTP) {
+    if (otp !== session.pendingOtp) {
       return NextResponse.json({ error: "קוד שגוי. נסה שוב." }, { status: 400 });
     }
 
@@ -41,6 +39,7 @@ export async function POST(req: Request) {
     session.pendingPhone = undefined;
     session.pendingName = undefined;
     session.pendingAddress = undefined;
+    session.pendingOtp = undefined;
     await session.save();
 
     return NextResponse.json({

@@ -5,6 +5,7 @@ export interface SessionData {
   pendingPhone?: string;
   pendingName?: string;
   pendingAddress?: string;
+  pendingOtp?: string;
 }
 
 export const sessionOptions: SessionOptions = {
