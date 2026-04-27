@@ -211,7 +211,7 @@ function ImageCropper({
               "top-0 left-0 border-t-2 border-l-2 rounded-tl",
               "bottom-0 right-0 border-b-2 border-r-2 rounded-br",
               "bottom-0 left-0 border-b-2 border-l-2 rounded-bl",
-            ].map((cls) => (
+            ].map((cls: any) => (
               <div key={cls} className={`absolute z-10 w-5 h-5 border-amber-400 pointer-events-none ${cls}`} />
             ))}
 
@@ -574,7 +574,7 @@ export default function SellPage() {
               <section className="bg-white rounded-2xl border border-stone-200 p-5">
                 <h2 className="font-bold text-stone-800 mb-4">מצב הספר</h2>
                 <div className="grid grid-cols-3 gap-2">
-                  {CONDITIONS.map((c) => (
+                  {CONDITIONS.map((c: any) => (
                     <button
                       key={c.value}
                       type="button"

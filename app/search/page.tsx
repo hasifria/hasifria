@@ -54,8 +54,8 @@ export default async function SearchPage({ searchParams }: Props) {
     : [];
 
   const results = books
-    .filter((b) => b.listings.length > 0)
-    .map((b) => ({
+    .filter((b: any) => b.listings.length > 0)
+    .map((b: any) => ({
       id: b.id,
       title: b.title,
       author: b.author,
@@ -90,7 +90,7 @@ export default async function SearchPage({ searchParams }: Props) {
               defaultValue={city}
               className="px-3 py-2 border border-stone-200 rounded-xl bg-stone-50 text-sm text-stone-700 outline-none focus:border-amber-400 cursor-pointer"
             >
-              {CITIES.map((c) => (
+              {CITIES.map((c: any) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
@@ -143,7 +143,7 @@ export default async function SearchPage({ searchParams }: Props) {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {results.map((book) => (
+                {results.map((book: any) => (
                   <Link
                     key={book.id}
                     href={`/books/${book.id}`}

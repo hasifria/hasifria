@@ -113,7 +113,7 @@ export default async function BookPage({ params }: Props) {
                   </div>
                 ) : (
                   <div className="divide-y divide-stone-100">
-                    {book.listings.map((listing) => (
+                    {book.listings.map((listing: any) => (
                       <div key={listing.id} className="py-4 flex items-center gap-4">
                         {/* Avatar */}
                         <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0 text-lg font-bold text-amber-700">
@@ -130,8 +130,8 @@ export default async function BookPage({ params }: Props) {
                               </svg>
                               {listing.seller.address ?? listing.seller.city ?? "לא צוין"}
                             </span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${conditionMap[listing.condition].color}`}>
-                              {conditionMap[listing.condition].label}
+                            <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${conditionMap[listing.condition as keyof typeof conditionMap].color}`}>
+                              {conditionMap[listing.condition as keyof typeof conditionMap].label}
                             </span>
                           </div>
                         </div>

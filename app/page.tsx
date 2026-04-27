@@ -95,7 +95,7 @@ export default function Home() {
                   onChange={(e) => setCity(e.target.value)}
                   className="w-full py-3 outline-none text-stone-700 bg-transparent cursor-pointer"
                 >
-                  {CITIES.map((c) => (
+                  {CITIES.map((c: any) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
@@ -116,7 +116,7 @@ export default function Home() {
         <section className="max-w-6xl mx-auto px-4 py-12">
           <h2 className="text-xl font-bold text-stone-800 mb-6">חפש לפי קטגוריה</h2>
           <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
-            {CATEGORIES.map((cat) => (
+            {CATEGORIES.map((cat: any) => (
               <button
                 key={cat.label}
                 className="flex flex-col items-center gap-2 p-3 bg-white rounded-xl border border-stone-200 hover:border-amber-400 hover:shadow-sm transition-all group"
@@ -138,7 +138,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {recent.map((item) => (
+              {recent.map((item: any) => (
                 <Link
                   key={item.listingId}
                   href={`/books/${item.bookId}`}
@@ -189,7 +189,7 @@ export default function Home() {
                 { step: "1", title: "חפש ספר", desc: "חפש לפי שם ספר, סופר או מיקום", icon: "🔍" },
                 { step: "2", title: "צור קשר עם המוכר", desc: "שלח הודעה ישירות למוכר", icon: "💬" },
                 { step: "3", title: "קנה ואסוף", desc: "הגיעו להסכמה ואסוף את הספר", icon: "🤝" },
-              ].map((item) => (
+              ].map((item: any) => (
                 <div key={item.step} className="flex flex-col items-center gap-3">
                   <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-2xl">
                     {item.icon}

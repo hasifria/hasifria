@@ -146,7 +146,7 @@ function VerifyForm() {
             <form onSubmit={handleSubmit}>
               {/* OTP boxes — LTR order: box0 box1 box2 box3 */}
               <div className="flex justify-center gap-3 mb-2" dir="ltr">
-                {digits.map((digit, i) => (
+                {digits.map((digit: any, i: any) => (
                   <input
                     key={i}
                     ref={inputRefs[i]}

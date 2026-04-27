@@ -29,7 +29,7 @@ export default async function SellerPage({ params }: Props) {
   const serialized = {
     ...seller,
     created_at: seller.created_at.toISOString(),
-    listings: seller.listings.map((l) => ({
+    listings: seller.listings.map((l: any) => ({
       ...l,
       price: Number(l.price),
       created_at: l.created_at.toISOString(),

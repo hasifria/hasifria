@@ -303,8 +303,8 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
   const [modal, setModal] = useState<Modal>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const available = listings.filter((l) => l.status === "available");
-  const sold = listings.filter((l) => l.status === "sold");
+  const available = listings.filter((l: any) => l.status === "available");
+  const sold = listings.filter((l: any) => l.status === "sold");
 
   async function updateListing(id: string, patch: { price?: number; status?: "available" | "sold" }) {
     setBusyId(id);
@@ -316,7 +316,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
     if (res.ok) {
       const updated = await res.json();
       setListings((prev) =>
-        prev.map((l) => (l.id === id ? { ...l, ...updated, price: Number(updated.price) } : l))
+        prev.map((l: any) => (l.id === id ? { ...l, ...updated, price: Number(updated.price) } : l))
       );
     }
     setBusyId(null);
@@ -326,12 +326,12 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
   async function deleteListing(id: string) {
     setBusyId(id);
     const res = await fetch(`/api/listings/${id}`, { method: "DELETE" });
-    if (res.ok) setListings((prev) => prev.filter((l) => l.id !== id));
+    if (res.ok) setListings((prev) => prev.filter((l: any) => l.id !== id));
     setBusyId(null);
     setModal(null);
   }
 
-  const modalListing = modal ? listings.find((l) => l.id === modal.listing.id) ?? modal.listing : null;
+  const modalListing = modal ? listings.find((l: any) => l.id === modal.listing.id) ?? modal.listing : null;
 
   return (
     <main className="flex-1 bg-stone-50">
@@ -410,7 +410,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
                   למכירה ({available.length})
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {available.map((l) => (
+                  {available.map((l: any) => (
                     <ListingCard
                       key={l.id}
                       listing={l}
@@ -432,7 +432,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
                   נמכרו ({sold.length})
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {sold.map((l) => (
+                  {sold.map((l: any) => (
                     <ListingCard
                       key={l.id}
                       listing={l}
