@@ -13,7 +13,7 @@ export async function GET() {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = listings.map((l: any) => ({
+    const result = (listings as any[]).map((l: any) => ({
       listingId: l.id,
       bookId: l.book.id,
       title: l.book.title,
