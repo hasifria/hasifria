@@ -12,7 +12,7 @@ export async function GET() {
       take: 8,
     });
 
-    const result = listings.map((l) => ({
+    const result = listings.map((l: (typeof listings)[number]) => ({
       listingId: l.id,
       bookId: l.book.id,
       title: l.book.title,
