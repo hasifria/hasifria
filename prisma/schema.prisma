@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Book {
+  id          String    @id @default(cuid())
+  isbn        String?   @unique
+  title       String
+  author      String
+  genre       String?
+  description String?
+  cover_image String?
+  created_at  DateTime  @default(now())
+
+  listings    Listing[]
+
+  @@map("books")
+}
+
+model User {
+  id         String    @id @default(cuid())
+  name       String?
+  phone      String    @unique
+  address    String?
+  city       String?
+  created_at DateTime  @default(now())
+
+  listings   Listing[]
+
+  @@map("users")
+}
+
+model Listing {
+  id         String          @id @default(cuid())
+  book_id    String
+  seller_id  String
+  price      Decimal         @db.Decimal(10, 2)
+  condition  BookCondition
+  status     ListingStatus   @default(available)
+  created_at DateTime        @default(now())
+
+  book       Book            @relation(fields: [book_id], references: [id])
+  seller     User            @relation(fields: [seller_id], references: [id])
+
+  @@map("listings")
+}
+
+enum BookCondition {
+  new
+  good
+  worn
+}
+
+enum ListingStatus {
+  available
+  sold
+}

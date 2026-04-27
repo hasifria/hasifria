@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-heebo: var(--font-heebo);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-heebo), "Arial Hebrew", Arial, sans-serif;
+}
