@@ -1,12 +1,12 @@
-import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
-type RecentListing = Prisma.ListingGetPayload<{
-  include: {
-    book: { select: { id: true; title: true; author: true; cover_image: true } };
-    seller: { select: { address: true; city: true } };
-  };
-}>;
+type RecentListing = {
+  id: string;
+  price: { toString(): string } | number;
+  condition: string;
+  book: { id: string; title: string; author: string; cover_image: string | null };
+  seller: { address: string | null; city: string | null };
+};
 
 export async function GET() {
   try {
