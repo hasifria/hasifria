@@ -53,6 +53,45 @@ function Spinner({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
+// ─── Pricing suggestion panel ─────────────────────────────────────────────────
+
+type PriceRange = { min: number | null; max: number | null; count: number };
+
+function PriceSuggestion({ isbn, bookTitle }: { isbn?: string | null; bookTitle?: string }) {
+  const [range, setRange] = useState<PriceRange | null>(null);
+
+  useEffect(() => {
+    if (!bookTitle && !isbn) return;
+    setRange(null);
+    const params = new URLSearchParams();
+    if (isbn) params.set("isbn", isbn);
+    if (bookTitle) params.set("title", bookTitle);
+    fetch(`/api/listings/price-range?${params}`)
+      .then((r) => r.json())
+      .then(setRange)
+      .catch(() => {});
+  }, [isbn, bookTitle]);
+
+  if (!range) return null;
+
+  let message: string;
+  if (range.count === 0) {
+    message = "הספר הזה עדיין לא מוצע למכירה באתר — אתה הראשון!";
+  } else if (range.count === 1 || range.min === range.max) {
+    message = `מוכר אחר מציע ספר זה ב: ${range.min}₪`;
+  } else {
+    message = `מוכרים אחרים מציעים ספר זה ב: ${range.min}₪ - ${range.max}₪`;
+  }
+
+  return (
+    <div className="bg-[#1e1e1e] border border-[#F5A623]/40 rounded-2xl p-5">
+      <p className="text-sm font-semibold text-[#F5A623] mb-1.5">💡 עזרה בתמחור</p>
+      <p className="text-sm text-[#F0F0F0]">{message}</p>
+      <p className="text-xs text-[#555] mt-2">זו הצעה בלבד — אפשר לתמחר כרצונך</p>
+    </div>
+  );
+}
+
 // ─── Shared listing form sections ─────────────────────────────────────────────
 
 function ListingFormSections({
@@ -61,6 +100,7 @@ function ListingFormSections({
   isFree, setIsFree,
   category, setCategory,
   submitting, formError,
+  isbn, bookTitle,
 }: {
   condition: Condition;
   setCondition: (c: Condition) => void;
@@ -72,6 +112,8 @@ function ListingFormSections({
   setCategory: (c: string) => void;
   submitting: boolean;
   formError: string;
+  isbn?: string | null;
+  bookTitle?: string;
 }) {
   return (
     <>
@@ -105,6 +147,8 @@ function ListingFormSections({
           ))}
         </div>
       </section>
+
+      <PriceSuggestion isbn={isbn} bookTitle={bookTitle} />
 
       <section className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-5">
         <div className="flex items-center justify-between mb-4">
@@ -503,6 +547,7 @@ function MobileSell() {
                   isFree={isFree} setIsFree={setIsFree}
                   category={category} setCategory={setCategory}
                   submitting={submitting} formError={formError}
+                  isbn={resolvedBook?.isbn} bookTitle={resolvedBook?.title}
                 />
               </form>
             )}
@@ -751,6 +796,7 @@ function DesktopSell() {
                   isFree={isFree} setIsFree={setIsFree}
                   category={category} setCategory={setCategory}
                   submitting={submitting} formError={formError}
+                  isbn={resolvedBook?.isbn} bookTitle={resolvedBook?.title}
                 />
               )}
             </form>
