@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") ?? "";
+
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,7 +32,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push(`/verify?phone=${encodeURIComponent(data.phone)}`);
+    const verifyUrl = `/verify?phone=${encodeURIComponent(data.phone)}${redirectTo ? `&redirect=${encodeURIComponent(redirectTo)}` : ""}`;
+    router.push(verifyUrl);
   }
 
   return (
@@ -95,11 +99,24 @@ export default function LoginPage() {
 
             <p className="text-center text-xs text-[#555] mt-6 leading-relaxed">
               אין לך חשבון?{" "}
-              <a href="/register" className="text-[#F5A623] hover:text-[#e0941a]">הרשמה</a>
+              <a
+                href={`/register${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
+                className="text-[#F5A623] hover:text-[#e0941a]"
+              >
+                הרשמה
+              </a>
             </p>
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

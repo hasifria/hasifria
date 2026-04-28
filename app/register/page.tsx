@@ -160,7 +160,12 @@ function RegisterForm() {
 
             <p className="text-center text-sm text-[#555] mt-5">
               כבר יש לך חשבון?{" "}
-              <a href="/login" className="text-[#F5A623] hover:text-[#e0941a] font-medium">כניסה</a>
+              <a
+                href={`/login${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
+                className="text-[#F5A623] hover:text-[#e0941a] font-medium"
+              >
+                כניסה
+              </a>
             </p>
           </div>
 

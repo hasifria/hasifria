@@ -72,23 +72,26 @@ export default async function LikedPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <h2 className="text-xl font-bold text-[#F0F0F0] mb-2">אין ספרים שמורים</h2>
+              <h2 className="text-xl font-bold text-[#F0F0F0] mb-2">עדיין לא אהבת ספרים</h2>
               <p className="text-[#888] text-sm mb-6">לחץ על ❤️ על כל ספר כדי לשמור אותו כאן</p>
               <Link
                 href="/"
                 className="inline-block bg-[#F5A623] hover:bg-[#e0941a] text-black font-bold px-6 py-3 rounded-xl transition-colors text-sm"
               >
-                עיין בספרים
+                גלה ספרים
               </Link>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {items.map((item) => (
+                // Absolute-positioned card link avoids nested <a> tags
                 <div key={item.listingId} className="relative group">
                   <Link
                     href={`/books/${item.bookId}`}
-                    className="block bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] hover:border-[#F5A623]/40 transition-all overflow-hidden"
-                  >
+                    className="absolute inset-0 z-0 rounded-xl"
+                    aria-label={item.title}
+                  />
+                  <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] hover:border-[#F5A623]/40 transition-all overflow-hidden">
                     <div className="bg-[#2a2a2a] aspect-[2/3] flex items-center justify-center overflow-hidden">
                       {item.cover_image ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -101,12 +104,11 @@ export default async function LikedPage() {
                         <span className="text-5xl opacity-20">📕</span>
                       )}
                     </div>
-                    <div className="p-3">
+                    <div className="p-3 relative">
                       <h3 className="font-semibold text-[#F0F0F0] text-sm leading-snug mb-0.5 line-clamp-2">{item.title}</h3>
                       <Link
                         href={`/author/${encodeURIComponent(item.author)}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-xs text-[#4ECDC4] hover:underline truncate block mb-2"
+                        className="relative z-10 text-xs text-[#4ECDC4] hover:underline truncate block mb-2"
                       >
                         {item.author}
                       </Link>
@@ -127,8 +129,8 @@ export default async function LikedPage() {
                         </div>
                       )}
                     </div>
-                  </Link>
-                  <div className="absolute top-2 left-2">
+                  </div>
+                  <div className="absolute top-2 left-2 z-10">
                     <LikeButton listingId={item.listingId} />
                   </div>
                 </div>
