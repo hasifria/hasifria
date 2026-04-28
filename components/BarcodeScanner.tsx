@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function BarcodeScanner({
   onScan,
@@ -11,6 +11,7 @@ export default function BarcodeScanner({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<{ stop(): void } | null>(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,7 +27,16 @@ export default function BarcodeScanner({
             onScan(result.getText());
           }
         })
-        .catch(console.error);
+        .catch((err: unknown) => {
+          if (
+            err instanceof Error &&
+            (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")
+          ) {
+            setPermissionDenied(true);
+          } else {
+            console.error(err);
+          }
+        });
     });
 
     return () => {
@@ -34,6 +44,33 @@ export default function BarcodeScanner({
       controlsRef.current?.stop();
     };
   }, [onScan]);
+
+  if (permissionDenied) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-8 text-center" dir="rtl">
+        <div className="w-16 h-16 bg-red-900/40 rounded-full flex items-center justify-center mb-5">
+          <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+        </div>
+        <p className="text-white text-sm leading-relaxed mb-6">
+          נדרשת הרשאת מצלמה לסריקת ברקוד. אנא אפשר גישה למצלמה בהגדרות הדפדפן ורענן את הדף
+        </p>
+        <button
+          onClick={() => location.reload()}
+          className="px-6 py-3 bg-[#F5A623] hover:bg-[#e0941a] text-black font-bold rounded-2xl transition-colors"
+        >
+          רענן דף
+        </button>
+        <button
+          onClick={onClose}
+          className="mt-4 text-white/50 hover:text-white/80 text-sm transition-colors"
+        >
+          ביטול
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">

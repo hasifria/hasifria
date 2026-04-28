@@ -73,12 +73,12 @@ function RegisterForm() {
                 <span className="text-2xl">👤</span>
               </div>
               <h1 className="text-2xl font-bold text-[#F0F0F0]">הרשמה</h1>
-              <p className="text-[#888] text-sm mt-2">מלא את הפרטים כדי להתחיל למכור</p>
+              <p className="text-[#888] text-sm mt-2">מלא את הפרטים כדי להתחיל</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">שם מלא</label>
+                <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">שם</label>
                 <input
                   type="text"
                   value={name}
@@ -91,12 +91,12 @@ function RegisterForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">כתובת (עיר / שכונה)</label>
+                <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">כתובת</label>
                 <input
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="תל אביב, רמת גן..."
+                  placeholder="כתובת (עיר ורחוב בלי דירה)"
                   className="w-full px-4 py-3 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] placeholder:text-[#555] outline-none focus:border-[#F5A623] focus:ring-2 focus:ring-[#F5A623]/20 transition"
                   required
                 />

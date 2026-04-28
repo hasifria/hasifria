@@ -215,11 +215,11 @@ function MobileListingModal({
 
 // ─── Mobile flow ──────────────────────────────────────────────────────────────
 
-type MobileStep = "scanning" | "looking-up" | "found" | "manual" | "listing";
+type MobileStep = "idle" | "scanning" | "looking-up" | "found" | "manual" | "listing";
 
 function MobileSell() {
   const router = useRouter();
-  const [step, setStep] = useState<MobileStep>("scanning");
+  const [step, setStep] = useState<MobileStep>("idle");
   const [scannedISBN, setScannedISBN] = useState("");
   const [foundBook, setFoundBook] = useState<Book | null>(null);
   const [resolvedBook, setResolvedBook] = useState<ResolvedBook | null>(null);
@@ -278,7 +278,7 @@ function MobileSell() {
   const resetToScan = () => {
     setFoundBook(null); setResolvedBook(null);
     setTitle(""); setAuthor(""); setCoverImage(null); setManualError("");
-    setStep("scanning");
+    setStep("idle");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -325,7 +325,27 @@ function MobileSell() {
     }
   };
 
-  if (step === "scanning") return <BarcodeScanner onScan={handleScan} onClose={() => setStep("manual")} />;
+  if (step === "idle") {
+    return (
+      <div className="min-h-screen bg-[#0f0f0f] flex flex-col items-center justify-center p-8 text-center" dir="rtl">
+        <div className="w-20 h-20 bg-[#F5A623]/10 rounded-full flex items-center justify-center mb-6">
+          <svg className="w-10 h-10 text-[#F5A623]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+          </svg>
+        </div>
+        <h1 className="text-xl font-bold text-[#F0F0F0] mb-2">פרסום ספר למכירה</h1>
+        <p className="text-[#888] text-sm mb-8">חייבים לסרוק את הברקוד בכדי לפרסם ספר</p>
+        <button
+          onClick={() => setStep("scanning")}
+          className="px-8 py-4 bg-[#F5A623] hover:bg-[#e0941a] active:bg-[#c07f14] text-black font-bold rounded-2xl text-lg transition-colors"
+        >
+          סרוק ברקוד
+        </button>
+      </div>
+    );
+  }
+
+  if (step === "scanning") return <BarcodeScanner onScan={handleScan} onClose={() => setStep("idle")} />;
   if (step === "looking-up") {
     return (
       <div className="min-h-screen bg-[#0f0f0f] flex flex-col items-center justify-center gap-3">

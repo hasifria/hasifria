@@ -1,28 +1,23 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { prisma } from "@/lib/db";
-
-const CITIES = [
-  "כל הארץ", "תל אביב", "ירושלים", "חיפה", "באר שבע",
-  "ראשון לציון", "נס ציונה", "פתח תקווה", "אשדוד", "נתניה",
-  "רחובות", "חולון", "בת ים", "בני ברק",
-];
+import CityAutocomplete from "@/components/CityAutocomplete";
 
 type Props = { searchParams: Promise<{ q?: string; city?: string }> };
 
 export default async function SearchPage({ searchParams }: Props) {
-  const { q = "", city = "כל הארץ" } = await searchParams;
+  const { q = "", city = "" } = await searchParams;
 
   const trimmedQ = q.trim();
-  const cityFilter = !!(city && city !== "כל הארץ");
+  const cityFilter = !!(city && city !== "כל הארץ" && city.trim());
   const hasQuery = !!(trimmedQ || cityFilter);
 
   const cityWhere = cityFilter
     ? {
         seller: {
           OR: [
-            { address: { contains: city, mode: "insensitive" as const } },
-            { city:    { contains: city, mode: "insensitive" as const } },
+            { address: { contains: city.trim(), mode: "insensitive" as const } },
+            { city:    { contains: city.trim(), mode: "insensitive" as const } },
           ],
         },
       }
@@ -66,9 +61,8 @@ export default async function SearchPage({ searchParams }: Props) {
       listingId: b.listings[0].id,
     }));
 
-  // Group unique authors first (when searching by author name)
   const uniqueAuthors = trimmedQ
-    ? [...new Set(results.map((r: any) => r.author))].filter((a: string) =>
+    ? [...new Set(results.map((r: any) => r.author as string))].filter((a) =>
         a.toLowerCase().includes(trimmedQ.toLowerCase())
       )
     : [];
@@ -81,6 +75,7 @@ export default async function SearchPage({ searchParams }: Props) {
       <div className="bg-[#141414] border-b border-[#2a2a2a] sticky top-16 z-40">
         <div className="max-w-6xl mx-auto px-4 py-3">
           <form method="get" action="/search" className="flex gap-2 flex-col sm:flex-row">
+            {/* Text search */}
             <div className="flex-1 flex items-center gap-2 bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl px-3 focus-within:border-[#F5A623] transition">
               <svg className="w-4 h-4 text-[#555] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -90,19 +85,13 @@ export default async function SearchPage({ searchParams }: Props) {
                 name="q"
                 defaultValue={q}
                 placeholder="שם ספר, סופר..."
+                autoComplete="off"
                 className="flex-1 py-2 bg-transparent text-sm outline-none placeholder:text-[#555] text-[#F0F0F0]"
               />
             </div>
 
-            <select
-              name="city"
-              defaultValue={city}
-              className="px-3 py-2 border border-[#2a2a2a] rounded-xl bg-[#1e1e1e] text-sm text-[#F0F0F0] outline-none focus:border-[#F5A623] cursor-pointer"
-            >
-              {CITIES.map((c: any) => (
-                <option key={c} value={c} className="bg-[#1e1e1e]">{c}</option>
-              ))}
-            </select>
+            {/* Dynamic city autocomplete */}
+            <CityAutocomplete defaultValue={city} name="city" />
 
             <button
               type="submit"
@@ -154,14 +143,14 @@ export default async function SearchPage({ searchParams }: Props) {
                 <div className="mb-10">
                   <h2 className="text-sm font-semibold text-[#888] uppercase tracking-wider mb-4">סופרים</h2>
                   <div className="flex flex-wrap gap-2">
-                    {uniqueAuthors.map((author: any) => (
+                    {uniqueAuthors.map((author) => (
                       <Link
                         key={author}
                         href={`/author/${encodeURIComponent(author)}`}
                         className="flex items-center gap-2 px-4 py-2.5 bg-[#1e1e1e] border border-[#2a2a2a] hover:border-[#F5A623]/50 rounded-xl transition-all group"
                       >
                         <div className="w-8 h-8 rounded-full bg-[#F5A623]/10 flex items-center justify-center text-sm font-bold text-[#F5A623]">
-                          {(author as string).charAt(0)}
+                          {author.charAt(0)}
                         </div>
                         <span className="text-sm font-medium text-[#F0F0F0] group-hover:text-[#F5A623] transition-colors">{author}</span>
                       </Link>
@@ -170,18 +159,25 @@ export default async function SearchPage({ searchParams }: Props) {
                 </div>
               )}
 
-              {/* Books section */}
+              {/* Books section — no nested <a> tags */}
               <div>
                 {uniqueAuthors.length > 0 && (
                   <h2 className="text-sm font-semibold text-[#888] uppercase tracking-wider mb-4">ספרים</h2>
                 )}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {results.map((book: any) => (
-                    <Link
+                    // Use relative+absolute pattern to avoid nested <a> tags (which crash React)
+                    <div
                       key={book.id}
-                      href={`/books/${book.id}`}
-                      className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] hover:border-[#F5A623]/40 transition-all overflow-hidden group"
+                      className="relative bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] hover:border-[#F5A623]/40 transition-all overflow-hidden group"
                     >
+                      {/* Full-card link (sits behind everything) */}
+                      <Link
+                        href={`/books/${book.id}`}
+                        className="absolute inset-0 z-0 rounded-2xl"
+                        aria-label={book.title}
+                      />
+
                       <div className="aspect-[2/3] bg-[#2a2a2a] flex items-center justify-center overflow-hidden">
                         {book.cover_image ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -195,14 +191,14 @@ export default async function SearchPage({ searchParams }: Props) {
                         )}
                       </div>
 
-                      <div className="p-3">
+                      <div className="p-3 relative">
                         <h3 className="font-semibold text-[#F0F0F0] text-sm leading-snug line-clamp-2 mb-0.5">
                           {book.title}
                         </h3>
+                        {/* Author link sits above the card link via z-10 */}
                         <Link
                           href={`/author/${encodeURIComponent(book.author)}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-xs text-[#4ECDC4] hover:underline truncate block mb-2"
+                          className="relative z-10 text-xs text-[#4ECDC4] hover:underline truncate block mb-2"
                         >
                           {book.author}
                         </Link>
@@ -215,7 +211,7 @@ export default async function SearchPage({ searchParams }: Props) {
                           <p className="text-sm font-bold text-[#4ECDC4]">חינם</p>
                         )}
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               </div>
