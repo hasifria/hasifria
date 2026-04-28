@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import ShareButton from "@/components/ShareButton";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ type Listing = {
   id: string;
   book_id: string;
   seller_id: string;
-  price: number;
+  price: number | null;
   condition: "new" | "good" | "worn";
   status: "available" | "sold";
   created_at: string;
@@ -45,9 +46,9 @@ type Modal =
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const conditionMap = {
-  new:  { label: "כמו חדש",  color: "bg-emerald-100 text-emerald-700" },
-  good: { label: "מצב טוב",  color: "bg-amber-100 text-amber-700" },
-  worn: { label: "מצב סביר", color: "bg-stone-100 text-stone-600" },
+  new:  { label: "כמו חדש",  color: "bg-emerald-900/40 text-emerald-400" },
+  good: { label: "מצב טוב",  color: "bg-amber-900/40 text-amber-400" },
+  worn: { label: "מצב סביר", color: "bg-[#2a2a2a] text-[#888]" },
 };
 
 // ─── Price Modal ──────────────────────────────────────────────────────────────
@@ -59,59 +60,85 @@ function PriceModal({
   busy,
 }: {
   listing: Listing;
-  onSave: (price: number) => void;
+  onSave: (price: number | null) => void;
   onClose: () => void;
   busy: boolean;
 }) {
-  const [value, setValue] = useState(String(listing.price));
+  const [value, setValue] = useState(listing.price !== null ? String(listing.price) : "");
+  const [isFree, setIsFree] = useState(listing.price === null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef.current?.select();
+    if (!isFree) inputRef.current?.select();
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, isFree]);
 
   const parsed = parseFloat(value);
-  const valid = !isNaN(parsed) && parsed > 0;
+  const valid = isFree || (!isNaN(parsed) && parsed >= 0);
+
+  const handleSave = () => {
+    if (!valid) return;
+    onSave(isFree ? null : parsed);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-in fade-in zoom-in-95 duration-150">
-        <h2 className="text-lg font-bold text-stone-900 mb-1">שינוי מחיר</h2>
-        <p className="text-sm text-stone-500 mb-5 line-clamp-1">{listing.book.title}</p>
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div className="relative bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <h2 className="text-lg font-bold text-[#F0F0F0] mb-1">שינוי מחיר</h2>
+        <p className="text-sm text-[#888] mb-5 line-clamp-1">{listing.book.title}</p>
 
-        <label className="block text-sm font-medium text-stone-700 mb-2">מחיר חדש</label>
-        <div className="flex items-center border-2 border-stone-200 rounded-xl overflow-hidden focus-within:border-amber-500 transition-colors">
-          <span className="px-3 py-3 bg-stone-50 text-stone-500 font-bold border-l border-stone-200 text-sm">₪</span>
-          <input
-            ref={inputRef}
-            type="number"
-            min="1"
-            step="1"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && valid) onSave(parsed); }}
-            className="flex-1 px-4 py-3 text-lg font-bold text-stone-900 outline-none bg-white"
-            dir="ltr"
-            autoFocus
-          />
-        </div>
-        <p className="text-xs text-stone-400 mt-1.5">מחיר נוכחי: ₪{listing.price}</p>
+        <label className="flex items-center justify-between mb-5 cursor-pointer">
+          <span className="text-sm font-medium text-[#a0a0a0]">למסירה חינם</span>
+          <div
+            onClick={() => setIsFree(!isFree)}
+            className={`w-10 rounded-full relative transition-colors cursor-pointer ${isFree ? "bg-[#4ECDC4]" : "bg-[#3a3a3a]"}`}
+            style={{ height: "22px" }}
+          >
+            <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${isFree ? "right-0.5" : "left-0.5"}`} />
+          </div>
+        </label>
+
+        {!isFree && (
+          <>
+            <label className="block text-sm font-medium text-[#a0a0a0] mb-2">מחיר חדש</label>
+            <div className="flex items-center border-2 border-[#2a2a2a] rounded-xl overflow-hidden focus-within:border-[#F5A623] transition-colors">
+              <span className="px-3 py-3 bg-[#141414] text-[#555] font-bold border-l border-[#2a2a2a] text-sm">₪</span>
+              <input
+                ref={inputRef}
+                type="number"
+                min="0"
+                step="1"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && valid) handleSave(); }}
+                className="flex-1 px-4 py-3 text-lg font-bold text-[#F0F0F0] outline-none bg-[#1e1e1e]"
+                dir="ltr"
+                autoFocus={!isFree}
+              />
+            </div>
+            {listing.price !== null && (
+              <p className="text-xs text-[#555] mt-1.5">מחיר נוכחי: ₪{listing.price}</p>
+            )}
+          </>
+        )}
+        {isFree && (
+          <div className="text-center py-3 text-[#4ECDC4] font-bold text-lg">למסירה חינם</div>
+        )}
 
         <div className="flex gap-3 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-sm font-medium hover:bg-stone-50 transition-colors"
+            className="flex-1 py-2.5 rounded-xl border border-[#2a2a2a] text-[#888] text-sm font-medium hover:bg-[#2a2a2a] transition-colors"
           >
             ביטול
           </button>
           <button
-            onClick={() => valid && onSave(parsed)}
+            onClick={handleSave}
             disabled={!valid || busy}
-            className="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+            className="flex-1 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#e0941a] disabled:opacity-50 disabled:cursor-not-allowed text-black text-sm font-semibold transition-colors"
           >
             {busy ? "שומר..." : "שמור מחיר"}
           </button>
@@ -142,29 +169,29 @@ function DeleteModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div className="relative bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <div className="w-12 h-12 bg-red-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </div>
-        <h2 className="text-lg font-bold text-stone-900 text-center mb-1">מחיקת מודעה</h2>
-        <p className="text-sm text-stone-500 text-center mb-1">האם למחוק את המודעה עבור</p>
-        <p className="text-sm font-semibold text-stone-800 text-center mb-5 line-clamp-2">&ldquo;{listing.book.title}&rdquo;?</p>
-        <p className="text-xs text-stone-400 text-center mb-5">פעולה זו אינה הפיכה</p>
+        <h2 className="text-lg font-bold text-[#F0F0F0] text-center mb-1">מחיקת מודעה</h2>
+        <p className="text-sm text-[#888] text-center mb-1">האם למחוק את המודעה עבור</p>
+        <p className="text-sm font-semibold text-[#F0F0F0] text-center mb-5 line-clamp-2">&ldquo;{listing.book.title}&rdquo;?</p>
+        <p className="text-xs text-[#555] text-center mb-5">פעולה זו אינה הפיכה</p>
 
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-sm font-medium hover:bg-stone-50 transition-colors"
+            className="flex-1 py-2.5 rounded-xl border border-[#2a2a2a] text-[#888] text-sm font-medium hover:bg-[#2a2a2a] transition-colors"
           >
             ביטול
           </button>
           <button
             onClick={onConfirm}
             disabled={busy}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+            className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
           >
             {busy ? "מוחק..." : "כן, מחק"}
           </button>
@@ -196,7 +223,7 @@ function ListingCard({
   const isSold = listing.status === "sold";
 
   return (
-    <div className={`bg-white rounded-2xl border overflow-hidden transition-all ${isSold ? "border-stone-100 opacity-60 grayscale-[30%]" : "border-stone-200"}`}>
+    <div className={`bg-[#1e1e1e] rounded-2xl border overflow-hidden transition-all ${isSold ? "border-[#2a2a2a] opacity-50" : "border-[#2a2a2a]"}`}>
       <div className="flex gap-4 p-4">
         {/* Cover */}
         <div className="shrink-0">
@@ -208,8 +235,8 @@ function ListingCard({
               className="w-16 h-24 object-cover rounded-lg shadow-sm"
             />
           ) : (
-            <div className="w-16 h-24 bg-amber-50 rounded-lg flex items-center justify-center border border-amber-100">
-              <span className="text-2xl">📕</span>
+            <div className="w-16 h-24 bg-[#2a2a2a] rounded-lg flex items-center justify-center border border-[#3a3a3a]">
+              <span className="text-2xl opacity-40">📕</span>
             </div>
           )}
         </div>
@@ -218,34 +245,36 @@ function ListingCard({
         <div className="flex-1 min-w-0">
           <Link
             href={`/books/${listing.book_id}`}
-            className="font-semibold text-stone-900 hover:text-amber-700 transition-colors line-clamp-2 leading-snug block"
+            className="font-semibold text-[#F0F0F0] hover:text-[#F5A623] transition-colors line-clamp-2 leading-snug block"
           >
             {listing.book.title}
           </Link>
-          <p className="text-sm text-stone-500 mt-0.5 truncate">{listing.book.author}</p>
+          <p className="text-sm text-[#888] mt-0.5 truncate">{listing.book.author}</p>
 
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${conditionMap[listing.condition].color}`}>
               {conditionMap[listing.condition].label}
             </span>
             {isSold && (
-              <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-stone-200 text-stone-500 border border-stone-300">
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-[#2a2a2a] text-[#555] border border-[#3a3a3a]">
                 נמכר
               </span>
             )}
           </div>
 
-          <p className="mt-2 text-lg font-bold text-amber-700">₪{listing.price}</p>
+          <p className="mt-2 text-lg font-bold text-[#F5A623]">
+            {listing.price !== null ? `₪${listing.price}` : "חינם"}
+          </p>
         </div>
       </div>
 
-      {/* Action bar — sold listings */}
+      {/* Action bar — sold */}
       {isOwner && isSold && (
-        <div className="border-t border-stone-100 px-3 py-2.5 flex items-center bg-stone-50/60">
+        <div className="border-t border-[#2a2a2a] px-3 py-2.5 flex items-center bg-[#141414]">
           <button
             onClick={onMarkAvailable}
             disabled={isBusy}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium bg-white border border-stone-200 text-emerald-600 hover:border-emerald-400 hover:bg-emerald-50 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium bg-[#1e1e1e] border border-[#2a2a2a] text-emerald-400 hover:border-emerald-700 hover:bg-emerald-900/20 disabled:opacity-50 transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -255,13 +284,13 @@ function ListingCard({
         </div>
       )}
 
-      {/* Action bar — available listings only */}
+      {/* Action bar — available */}
       {isOwner && !isSold && (
-        <div className="border-t border-stone-100 px-3 py-2.5 flex items-center gap-2 bg-stone-50/60">
+        <div className="border-t border-[#2a2a2a] px-3 py-2.5 flex items-center gap-2 bg-[#141414]">
           <button
             onClick={onPriceClick}
             disabled={isBusy}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium bg-white border border-stone-200 text-stone-600 hover:border-amber-400 hover:text-amber-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium bg-[#1e1e1e] border border-[#2a2a2a] text-[#888] hover:border-[#F5A623]/50 hover:text-[#F5A623] disabled:opacity-50 transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -272,7 +301,7 @@ function ListingCard({
           <button
             onClick={onMarkSold}
             disabled={isBusy}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium bg-white border border-stone-200 text-stone-600 hover:border-stone-400 hover:text-stone-800 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium bg-[#1e1e1e] border border-[#2a2a2a] text-[#888] hover:border-[#3a3a3a] hover:text-[#F0F0F0] disabled:opacity-50 transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -283,7 +312,7 @@ function ListingCard({
           <button
             onClick={onDeleteClick}
             disabled={isBusy}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium text-red-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 transition-colors mr-auto"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium text-red-500 hover:bg-red-900/20 hover:text-red-400 disabled:opacity-50 transition-colors mr-auto"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -306,7 +335,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
   const available = listings.filter((l: any) => l.status === "available");
   const sold = listings.filter((l: any) => l.status === "sold");
 
-  async function updateListing(id: string, patch: { price?: number; status?: "available" | "sold" }) {
+  async function updateListing(id: string, patch: { price?: number | null; status?: "available" | "sold" }) {
     setBusyId(id);
     const res = await fetch(`/api/listings/${id}`, {
       method: "PATCH",
@@ -316,7 +345,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
     if (res.ok) {
       const updated = await res.json();
       setListings((prev) =>
-        prev.map((l: any) => (l.id === id ? { ...l, ...updated, price: Number(updated.price) } : l))
+        prev.map((l: any) => (l.id === id ? { ...l, ...updated } : l))
       );
     }
     setBusyId(null);
@@ -333,8 +362,12 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
 
   const modalListing = modal ? listings.find((l: any) => l.id === modal.listing.id) ?? modal.listing : null;
 
+  const sellerPageUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/seller/${seller.phone}`
+    : `/seller/${seller.phone}`;
+
   return (
-    <main className="flex-1 bg-stone-50">
+    <main className="flex-1">
       {/* Modals */}
       {modal?.type === "price" && modalListing && (
         <PriceModal
@@ -354,49 +387,52 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
       )}
 
       {/* Seller profile banner */}
-      <div className="bg-white border-b border-stone-200">
+      <div className="bg-[#141414] border-b border-[#2a2a2a]">
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="flex items-start gap-5">
-            <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-2xl font-bold text-amber-700 shrink-0">
+            <div className="w-16 h-16 rounded-full bg-[#F5A623]/10 flex items-center justify-center text-2xl font-bold text-[#F5A623] shrink-0">
               {(seller.name ?? seller.phone).charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-stone-900 truncate">
+              <h1 className="text-2xl font-bold text-[#F0F0F0] truncate">
                 {seller.name ?? seller.phone}
               </h1>
               {(seller.address ?? seller.city) && (
-                <p className="text-stone-500 text-sm mt-1 flex items-center gap-1">
+                <p className="text-[#888] text-sm mt-1 flex items-center gap-1">
                   <span>📍</span>
                   <span>{seller.address ?? seller.city}</span>
                 </p>
               )}
-              <p className="text-stone-400 text-sm mt-1">
+              <p className="text-[#555] text-sm mt-1">
                 {available.length} ספרים למכירה
               </p>
             </div>
-            {isOwner && (
-              <Link
-                href="/sell"
-                className="shrink-0 bg-amber-600 hover:bg-amber-700 transition-colors text-white text-sm font-medium px-4 py-2 rounded-xl"
-              >
-                + הוסף ספר
-              </Link>
-            )}
+            <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+              <ShareButton title={`${seller.name ?? seller.phone} — הספרייה`} url={sellerPageUrl} />
+              {isOwner && (
+                <Link
+                  href="/sell"
+                  className="bg-[#F5A623] hover:bg-[#e0941a] transition-colors text-black text-sm font-bold px-4 py-2 rounded-xl"
+                >
+                  + הוסף ספר
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {listings.length === 0 ? (
-          <div className="text-center py-20 text-stone-400">
+          <div className="text-center py-20 text-[#555]">
             <p className="text-5xl mb-4">📚</p>
-            <p className="text-xl font-semibold text-stone-600 mb-2">
+            <p className="text-xl font-semibold text-[#888] mb-2">
               {isOwner ? "עדיין לא פרסמת ספרים" : "אין ספרים למכירה כרגע"}
             </p>
             {isOwner && (
               <Link
                 href="/sell"
-                className="mt-4 inline-block bg-amber-600 hover:bg-amber-700 text-white font-medium px-6 py-3 rounded-xl transition-colors"
+                className="mt-4 inline-block bg-[#F5A623] hover:bg-[#e0941a] text-black font-bold px-6 py-3 rounded-xl transition-colors"
               >
                 פרסם את הספר הראשון שלך
               </Link>
@@ -406,7 +442,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
           <div className="space-y-8">
             {available.length > 0 && (
               <section>
-                <h2 className="text-lg font-bold text-stone-800 mb-4">
+                <h2 className="text-lg font-bold text-[#F0F0F0] mb-4">
                   למכירה ({available.length})
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -428,7 +464,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
 
             {sold.length > 0 && (
               <section>
-                <h2 className="text-lg font-bold text-stone-400 mb-4">
+                <h2 className="text-lg font-bold text-[#555] mb-4">
                   נמכרו ({sold.length})
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

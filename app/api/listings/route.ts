@@ -11,21 +11,27 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { bookId, isbn, title, author, genre, cover_image, condition, price } = body;
+    const { bookId, isbn, title, author, genre, cover_image, condition, price, category } = body;
 
     if (!condition || !["new", "good", "worn"].includes(condition)) {
       return Response.json({ error: "מצב הספר לא תקין" }, { status: 400 });
     }
-    const parsedPrice = parseFloat(price);
-    if (isNaN(parsedPrice) || parsedPrice <= 0) {
-      return Response.json({ error: "מחיר לא תקין" }, { status: 400 });
+
+    let parsedPrice: number | null = null;
+    if (price !== null && price !== undefined && price !== "") {
+      parsedPrice = parseFloat(price);
+      if (isNaN(parsedPrice) || parsedPrice < 0) {
+        return Response.json({ error: "מחיר לא תקין" }, { status: 400 });
+      }
     }
+
+    const validCategories = ["CHILDREN", "YOUNG_ADULT", "ADULT", "EDUCATION", "HEALTH"];
+    const parsedCategory = category && validCategories.includes(category) ? category : null;
 
     let book;
     if (bookId) {
       book = await prisma.book.findUnique({ where: { id: bookId } });
       if (!book) return Response.json({ error: "ספר לא נמצא" }, { status: 404 });
-      // Update cover if provided and book has none
       if (cover_image && !book.cover_image) {
         book = await prisma.book.update({ where: { id: bookId }, data: { cover_image } });
       }
@@ -49,6 +55,7 @@ export async function POST(req: Request) {
         seller_id: session.userId,
         price: parsedPrice,
         condition,
+        category: parsedCategory,
         status: "available",
       },
     });

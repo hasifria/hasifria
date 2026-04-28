@@ -29,9 +29,9 @@ export default async function SellerPage({ params }: Props) {
   const serialized = {
     ...seller,
     created_at: seller.created_at.toISOString(),
-    listings: seller.listings.map((l: any) => ({
+    listings: (seller.listings as any[]).map((l: any) => ({
       ...l,
-      price: Number(l.price),
+      price: l.price !== null ? Number(l.price) : null,
       created_at: l.created_at.toISOString(),
       book: {
         ...l.book,
@@ -41,7 +41,7 @@ export default async function SellerPage({ params }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-[#0f0f0f]">
       <Header />
       <Dashboard seller={serialized} isOwner={isOwner} />
     </div>

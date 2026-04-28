@@ -15,6 +15,7 @@ function VerifyForm() {
   const params = useSearchParams();
   const phone = params.get("phone") ?? "";
   const isRegisterMode = params.get("mode") === "register";
+  const redirectTo = params.get("redirect") ?? "";
 
   const [digits, setDigits] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
@@ -102,7 +103,9 @@ function VerifyForm() {
       return;
     }
 
-    if (data.isRegistration && data.phone) {
+    if (redirectTo) {
+      router.push(redirectTo);
+    } else if (data.isRegistration && data.phone) {
       router.push(`/seller/${encodeURIComponent(data.phone)}`);
     } else {
       router.push("/");
@@ -126,21 +129,21 @@ function VerifyForm() {
   const isComplete = digits.every(Boolean);
 
   return (
-    <div className="flex flex-col min-h-screen bg-stone-50">
+    <div className="flex flex-col min-h-screen bg-[#0f0f0f]">
       <Header />
       <main className="flex-1 flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-sm">
-          <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-8">
+          <div className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] shadow-xl p-8">
             {/* Icon + title */}
             <div className="text-center mb-8">
-              <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 bg-[#F5A623]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">💬</span>
               </div>
-              <h1 className="text-2xl font-bold text-stone-900">קוד אימות</h1>
-              <p className="text-stone-500 text-sm mt-2">
+              <h1 className="text-2xl font-bold text-[#F0F0F0]">קוד אימות</h1>
+              <p className="text-[#888] text-sm mt-2">
                 שלחנו קוד בן 6 ספרות למספר
               </p>
-              <p className="text-stone-800 font-semibold mt-1 dir-ltr" dir="ltr">
+              <p className="text-[#F0F0F0] font-semibold mt-1" dir="ltr">
                 {maskPhone(phone)}
               </p>
             </div>
@@ -160,16 +163,16 @@ function VerifyForm() {
                     onKeyDown={(e) => handleKeyDown(i, e)}
                     onPaste={i === 0 ? handlePaste : undefined}
                     className={`w-11 h-14 text-center text-xl font-bold rounded-xl border-2 outline-none transition-all
-                      ${digit ? "border-amber-500 bg-amber-50 text-amber-800" : "border-stone-200 bg-stone-50 text-stone-900"}
-                      ${error ? "border-red-400 bg-red-50" : ""}
-                      focus:border-amber-500 focus:ring-2 focus:ring-amber-100`}
+                      ${digit ? "border-[#F5A623] bg-[#F5A623]/10 text-[#F5A623]" : "border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0]"}
+                      ${error ? "border-red-500 bg-red-900/20" : ""}
+                      focus:border-[#F5A623] focus:ring-2 focus:ring-[#F5A623]/20`}
                   />
                 ))}
               </div>
 
               {/* Error */}
               {error && (
-                <div className="mt-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 text-center">
+                <div className="mt-3 bg-red-900/30 border border-red-800 rounded-xl px-4 py-3 text-sm text-red-400 text-center">
                   {error}
                 </div>
               )}
@@ -177,7 +180,7 @@ function VerifyForm() {
               <button
                 type="submit"
                 disabled={loading || !isComplete}
-                className="w-full mt-6 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-white font-semibold py-3 rounded-xl"
+                className="w-full mt-6 bg-[#F5A623] hover:bg-[#e0941a] active:bg-[#c07f14] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-black font-bold py-3 rounded-xl"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -193,12 +196,12 @@ function VerifyForm() {
 
             {/* Resend */}
             {!isRegisterMode && (
-              <div className="text-center mt-5 text-sm text-stone-500">
+              <div className="text-center mt-5 text-sm text-[#555]">
                 לא קיבלת קוד?{" "}
                 <button
                   onClick={handleResend}
                   disabled={resendCooldown > 0}
-                  className="text-amber-600 hover:text-amber-700 font-medium disabled:text-stone-400 disabled:cursor-not-allowed transition-colors"
+                  className="text-[#F5A623] hover:text-[#e0941a] font-medium disabled:text-[#555] disabled:cursor-not-allowed transition-colors"
                 >
                   {resendCooldown > 0 ? `שלח שוב (${resendCooldown}s)` : "שלח שוב"}
                 </button>
@@ -207,7 +210,7 @@ function VerifyForm() {
 
             <button
               onClick={() => router.push(isRegisterMode ? "/register" : "/login")}
-              className="w-full mt-3 text-sm text-stone-400 hover:text-stone-600 transition-colors text-center"
+              className="w-full mt-3 text-sm text-[#555] hover:text-[#888] transition-colors text-center"
             >
               ← {isRegisterMode ? "חזור להרשמה" : "שנה מספר טלפון"}
             </button>

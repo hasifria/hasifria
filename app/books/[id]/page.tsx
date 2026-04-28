@@ -2,11 +2,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/Header";
+import ShareButton from "@/components/ShareButton";
+import LikeButton from "@/components/LikeButton";
 
 const conditionMap = {
-  new:  { label: "כמו חדש",  color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  good: { label: "מצב טוב",  color: "bg-amber-100 text-amber-700 border-amber-200" },
-  worn: { label: "מצב סביר", color: "bg-stone-100 text-stone-600 border-stone-200" },
+  new:  { label: "כמו חדש",  color: "bg-emerald-900/40 text-emerald-400 border-emerald-800" },
+  good: { label: "מצב טוב",  color: "bg-amber-900/40 text-amber-400 border-amber-800" },
+  worn: { label: "מצב סביר", color: "bg-[#2a2a2a] text-[#888] border-[#3a3a3a]" },
 };
 
 function whatsappLink(phone: string, bookTitle: string) {
@@ -33,18 +35,21 @@ export default async function BookPage({ params }: Props) {
 
   if (!book) notFound();
 
-  const lowestPrice = book.listings[0]?.price ?? null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const lowestPrice = (book as any).listings[0]?.price ?? null;
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-[#0f0f0f]">
       <Header />
-      <main className="flex-1 bg-stone-50">
+      <main className="flex-1">
         {/* Breadcrumb */}
         <div className="max-w-6xl mx-auto px-4 py-4">
-          <nav className="text-sm text-stone-400 flex items-center gap-2">
-            <Link href="/" className="hover:text-amber-600 transition-colors">דף הבית</Link>
+          <nav className="text-sm text-[#555] flex items-center gap-2">
+            <Link href="/" className="hover:text-[#F5A623] transition-colors">דף הבית</Link>
             <span>/</span>
-            <span className="text-stone-600">{book.title}</span>
+            <Link href={`/author/${encodeURIComponent(book.author)}`} className="hover:text-[#4ECDC4] transition-colors">{book.author}</Link>
+            <span>/</span>
+            <span className="text-[#888]">{book.title}</span>
           </nav>
         </div>
 
@@ -53,7 +58,7 @@ export default async function BookPage({ params }: Props) {
 
             {/* Right column — book info */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-2xl border border-stone-200 p-6 flex flex-col sm:flex-row gap-6">
+              <div className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-6 flex flex-col sm:flex-row gap-6">
                 {/* Cover */}
                 <div className="shrink-0 w-40 mx-auto sm:mx-0">
                   {book.cover_image ? (
@@ -61,70 +66,85 @@ export default async function BookPage({ params }: Props) {
                     <img
                       src={book.cover_image}
                       alt={book.title}
-                      className="w-40 h-56 object-cover rounded-xl shadow-md"
+                      className="w-40 h-56 object-cover rounded-xl shadow-lg"
                     />
                   ) : (
-                    <div className="w-40 h-56 bg-amber-50 rounded-xl shadow-md flex flex-col items-center justify-center gap-2 border border-amber-100">
+                    <div className="w-40 h-56 bg-[#2a2a2a] rounded-xl shadow-lg flex flex-col items-center justify-center gap-2 border border-[#3a3a3a]">
                       <span className="text-5xl">📕</span>
-                      <span className="text-xs text-stone-400">אין תמונה</span>
+                      <span className="text-xs text-[#555]">אין תמונה</span>
                     </div>
                   )}
                 </div>
 
                 {/* Details */}
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-stone-900 leading-tight mb-1">{book.title}</h1>
-                  <p className="text-lg text-stone-500 mb-3">{book.author}</p>
+                  <div className="flex items-start justify-between gap-3 mb-1">
+                    <h1 className="text-2xl font-bold text-[#F0F0F0] leading-tight">{book.title}</h1>
+                    <ShareButton title={book.title} />
+                  </div>
+                  <Link
+                    href={`/author/${encodeURIComponent(book.author)}`}
+                    className="text-lg text-[#4ECDC4] hover:underline mb-3 inline-block"
+                  >
+                    {book.author}
+                  </Link>
 
                   {book.genre && (
-                    <span className="inline-block bg-amber-100 text-amber-700 text-xs font-medium px-3 py-1 rounded-full mb-4">
+                    <span className="inline-block bg-[#F5A623]/10 text-[#F5A623] text-xs font-medium px-3 py-1 rounded-full mb-4 block w-fit">
                       {book.genre}
                     </span>
                   )}
 
                   {book.isbn && (
-                    <p className="text-xs text-stone-400 mb-4">ISBN: {book.isbn}</p>
+                    <p className="text-xs text-[#555] mb-4">ISBN: {book.isbn}</p>
                   )}
 
                   {book.description && (
-                    <p className="text-stone-600 leading-relaxed text-sm">{book.description}</p>
+                    <p className="text-[#a0a0a0] leading-relaxed text-sm">{book.description}</p>
                   )}
 
                   {lowestPrice !== null && (
-                    <div className="mt-4 pt-4 border-t border-stone-100">
-                      <p className="text-xs text-stone-400 mb-1">מחיר החל מ</p>
-                      <p className="text-3xl font-bold text-amber-700">₪{Number(lowestPrice)}</p>
+                    <div className="mt-4 pt-4 border-t border-[#2a2a2a]">
+                      <p className="text-xs text-[#555] mb-1">מחיר החל מ</p>
+                      <p className="text-3xl font-bold text-[#F5A623]">₪{Number(lowestPrice)}</p>
+                    </div>
+                  )}
+                  {lowestPrice === null && (book as any).listings.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-[#2a2a2a]">
+                      <p className="text-2xl font-bold text-[#4ECDC4]">למסירה חינם</p>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Sellers */}
-              <div className="bg-white rounded-2xl border border-stone-200 p-6">
-                <h2 className="text-lg font-bold text-stone-800 mb-5">
-                  מוכרים ({book.listings.length})
+              <div className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-6">
+                <h2 className="text-lg font-bold text-[#F0F0F0] mb-5">
+                  מוכרים ({(book as any).listings.length})
                 </h2>
 
-                {book.listings.length === 0 ? (
-                  <div className="text-center py-12 text-stone-400">
+                {(book as any).listings.length === 0 ? (
+                  <div className="text-center py-12 text-[#555]">
                     <p className="text-4xl mb-3">😔</p>
-                    <p className="font-medium">אין מוכרים כרגע לספר זה</p>
+                    <p className="font-medium text-[#888]">אין מוכרים כרגע לספר זה</p>
                     <p className="text-sm mt-1">נסה שוב מאוחר יותר</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-stone-100">
-                    {book.listings.map((listing: any) => (
+                  <div className="divide-y divide-[#2a2a2a]">
+                    {(book as any).listings.map((listing: any) => (
                       <div key={listing.id} className="py-4 flex items-center gap-4">
                         {/* Avatar */}
-                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0 text-lg font-bold text-amber-700">
+                        <div className="w-10 h-10 rounded-full bg-[#F5A623]/10 flex items-center justify-center shrink-0 text-lg font-bold text-[#F5A623]">
                           {(listing.seller.name ?? listing.seller.phone).charAt(0)}
                         </div>
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-stone-900">{listing.seller.name ?? listing.seller.phone}</p>
+                          <Link href={`/seller/${listing.seller.phone}`} className="font-semibold text-[#F0F0F0] hover:text-[#F5A623] transition-colors">
+                            {listing.seller.name ?? listing.seller.phone}
+                          </Link>
                           <div className="flex items-center gap-3 mt-0.5">
-                            <span className="flex items-center gap-1 text-xs text-stone-400">
+                            <span className="flex items-center gap-1 text-xs text-[#555]">
                               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
                               </svg>
@@ -136,14 +156,17 @@ export default async function BookPage({ params }: Props) {
                           </div>
                         </div>
 
-                        {/* Price + CTA */}
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span className="text-xl font-bold text-amber-700">₪{Number(listing.price)}</span>
+                        {/* Price + CTA + Like */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <LikeButton listingId={listing.id} />
+                          <span className="text-xl font-bold text-[#F5A623]">
+                            {listing.price !== null ? `₪${Number(listing.price)}` : "חינם"}
+                          </span>
                           <a
                             href={whatsappLink(listing.seller.phone, book.title)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 active:bg-green-700 transition-colors text-white text-sm font-medium px-4 py-2 rounded-lg"
+                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 transition-colors text-white text-sm font-medium px-4 py-2 rounded-lg"
                           >
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
@@ -161,32 +184,32 @@ export default async function BookPage({ params }: Props) {
 
             {/* Left column — sidebar */}
             <div className="space-y-4">
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-                <h3 className="font-bold text-amber-800 mb-2 flex items-center gap-2">
+              <div className="bg-[#F5A623]/5 border border-[#F5A623]/20 rounded-2xl p-5">
+                <h3 className="font-bold text-[#F5A623] mb-2 flex items-center gap-2">
                   <span>💡</span> איך לקנות בבטחה?
                 </h3>
-                <ul className="text-sm text-amber-700 space-y-2">
+                <ul className="text-sm text-[#a0a0a0] space-y-2">
                   <li className="flex items-start gap-2">
-                    <span className="mt-0.5">✓</span>
+                    <span className="mt-0.5 text-[#4ECDC4]">✓</span>
                     <span>פגשו את המוכר במקום ציבורי</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="mt-0.5">✓</span>
+                    <span className="mt-0.5 text-[#4ECDC4]">✓</span>
                     <span>בדקו את הספר לפני התשלום</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="mt-0.5">✓</span>
+                    <span className="mt-0.5 text-[#4ECDC4]">✓</span>
                     <span>שמרו את שיחת הוואטסאפ</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="bg-white border border-stone-200 rounded-2xl p-5">
-                <h3 className="font-bold text-stone-800 mb-3">יש לכם את הספר הזה?</h3>
-                <p className="text-sm text-stone-500 mb-4">פרסמו מודעה בחינם ומכרו אותו</p>
+              <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5">
+                <h3 className="font-bold text-[#F0F0F0] mb-3">יש לכם את הספר הזה?</h3>
+                <p className="text-sm text-[#888] mb-4">פרסמו מודעה בחינם ומכרו אותו</p>
                 <Link
                   href={`/sell?bookId=${book.id}`}
-                  className="block w-full text-center bg-amber-600 hover:bg-amber-700 transition-colors text-white font-medium py-2.5 rounded-xl text-sm"
+                  className="block w-full text-center bg-[#F5A623] hover:bg-[#e0941a] transition-colors text-black font-medium py-2.5 rounded-xl text-sm"
                 >
                   פרסם מודעה
                 </Link>
@@ -197,8 +220,7 @@ export default async function BookPage({ params }: Props) {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-stone-900 text-stone-400 py-8 px-4 text-center text-sm">
+      <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-8 px-4 text-center text-sm">
         <p>© 2026 הספרייה — קנה ומכור ספרים יד שנייה בישראל</p>
       </footer>
     </div>

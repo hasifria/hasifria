@@ -32,6 +32,7 @@ model User {
   created_at DateTime  @default(now())
 
   listings   Listing[]
+  likes      Like[]
 
   @@map("users")
 }
@@ -40,21 +41,44 @@ model Listing {
   id         String          @id @default(cuid())
   book_id    String
   seller_id  String
-  price      Decimal         @db.Decimal(10, 2)
+  price      Decimal?        @db.Decimal(10, 2)
   condition  BookCondition
+  category   BookCategory?
   status     ListingStatus   @default(available)
   created_at DateTime        @default(now())
 
   book       Book            @relation(fields: [book_id], references: [id])
   seller     User            @relation(fields: [seller_id], references: [id])
+  likes      Like[]
 
   @@map("listings")
+}
+
+model Like {
+  id         String   @id @default(cuid())
+  user_id    String
+  listing_id String
+  created_at DateTime @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id])
+  listing Listing @relation(fields: [listing_id], references: [id])
+
+  @@unique([user_id, listing_id])
+  @@map("likes")
 }
 
 enum BookCondition {
   new
   good
   worn
+}
+
+enum BookCategory {
+  CHILDREN
+  YOUNG_ADULT
+  ADULT
+  EDUCATION
+  HEALTH
 }
 
 enum ListingStatus {

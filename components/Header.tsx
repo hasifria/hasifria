@@ -8,6 +8,7 @@ type User = { id: string; name: string | null; phone: string } | null;
 export function Header({ showSearch }: { showSearch?: boolean }) {
   const [user, setUser] = useState<User | "loading">("loading");
   const [query, setQuery] = useState("");
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -22,25 +23,34 @@ export function Header({ showSearch }: { showSearch?: boolean }) {
   };
 
   return (
-    <header className="bg-white border-b border-stone-200 sticky top-0 z-50">
+    <header className="bg-[#141414] border-b border-[#2a2a2a] sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <span className="text-2xl">📚</span>
-          <span className="text-xl font-bold text-amber-700 tracking-tight">הספרייה</span>
+          {!logoError ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src="/hasifria_logo.jpg"
+              alt="הספרייה"
+              className="h-8 w-auto rounded"
+              onError={() => setLogoError(true)}
+            />
+          ) : (
+            <span className="text-xl font-bold text-[#F5A623] tracking-tight">הספרייה</span>
+          )}
         </Link>
 
-        {/* Search bar (home page) */}
+        {/* Search bar */}
         {showSearch && (
-          <form onSubmit={handleSearch} className="flex-1 hidden md:flex items-center bg-stone-100 rounded-lg border border-stone-200 overflow-hidden max-w-xl">
+          <form onSubmit={handleSearch} className="flex-1 hidden md:flex items-center bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] overflow-hidden max-w-xl">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="חיפוש לפי ספר, סופר..."
-              className="flex-1 bg-transparent px-4 py-2 text-sm outline-none placeholder:text-stone-400"
+              className="flex-1 bg-transparent px-4 py-2 text-sm outline-none placeholder:text-[#555] text-[#F0F0F0]"
             />
-            <button type="submit" className="px-4 py-2 bg-amber-600 hover:bg-amber-700 transition-colors text-white text-sm font-medium">
+            <button type="submit" className="px-4 py-2 bg-[#F5A623] hover:bg-[#e0941a] transition-colors text-black text-sm font-medium">
               חיפוש
             </button>
           </form>
@@ -49,22 +59,33 @@ export function Header({ showSearch }: { showSearch?: boolean }) {
         {/* Nav */}
         <nav className="flex items-center gap-3 mr-auto">
           {user === "loading" ? (
-            <div className="w-20 h-8 bg-stone-100 rounded-lg animate-pulse" />
+            <div className="w-20 h-8 bg-[#2a2a2a] rounded-lg animate-pulse" />
           ) : user ? (
-            <Link
-              href={`/seller/${user.phone}`}
-              className="text-sm text-stone-700 hover:text-amber-700 font-medium transition-colors"
-            >
-              החנות שלי
-            </Link>
+            <>
+              <Link
+                href="/liked"
+                className="flex items-center gap-1.5 text-sm text-[#888] hover:text-[#FF4757] font-medium transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                שמורים
+              </Link>
+              <Link
+                href={`/seller/${user.phone}`}
+                className="text-sm text-[#a0a0a0] hover:text-[#F5A623] font-medium transition-colors"
+              >
+                החנות שלי
+              </Link>
+            </>
           ) : (
-            <Link href="/login" className="text-sm text-stone-600 hover:text-stone-900 transition-colors">
+            <Link href="/login" className="text-sm text-[#888] hover:text-[#F0F0F0] transition-colors">
               כניסה
             </Link>
           )}
           <Link
             href="/sell"
-            className="bg-amber-600 hover:bg-amber-700 transition-colors text-white text-sm font-medium px-4 py-2 rounded-lg"
+            className="bg-[#F5A623] hover:bg-[#e0941a] transition-colors text-black text-sm font-bold px-4 py-2 rounded-lg"
           >
             פרסם ספר
           </Link>

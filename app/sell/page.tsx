@@ -35,6 +35,15 @@ const CONDITIONS: { value: Condition; label: string; desc: string }[] = [
   { value: "worn", label: "מצב סביר", desc: "סימני שימוש קלים" },
 ];
 
+const CATEGORIES = [
+  { value: "", label: "ללא קטגוריה" },
+  { value: "CHILDREN", label: "ילדים" },
+  { value: "YOUNG_ADULT", label: "נוער" },
+  { value: "ADULT", label: "מבוגרים" },
+  { value: "EDUCATION", label: "לימוד" },
+  { value: "HEALTH", label: "בריאות" },
+];
+
 function Spinner({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg className={`animate-spin ${className}`} fill="none" viewBox="0 0 24 24">
@@ -44,51 +53,92 @@ function Spinner({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-// ─── Shared listing form sections (condition + price + submit) ─────────────────
+// ─── Shared listing form sections ─────────────────────────────────────────────
 
 function ListingFormSections({
-  condition,
-  setCondition,
-  price,
-  setPrice,
-  submitting,
-  formError,
+  condition, setCondition,
+  price, setPrice,
+  isFree, setIsFree,
+  category, setCategory,
+  submitting, formError,
 }: {
   condition: Condition;
   setCondition: (c: Condition) => void;
   price: string;
   setPrice: (p: string) => void;
+  isFree: boolean;
+  setIsFree: (f: boolean) => void;
+  category: string;
+  setCategory: (c: string) => void;
   submitting: boolean;
   formError: string;
 }) {
   return (
     <>
-      <section className="bg-white rounded-2xl border border-stone-200 p-5">
-        <h2 className="font-bold text-stone-800 mb-4">מצב הספר</h2>
+      <section className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-5">
+        <h2 className="font-bold text-[#F0F0F0] mb-4">מצב הספר</h2>
         <div className="grid grid-cols-3 gap-2">
           {CONDITIONS.map((c: any) => (
             <button key={c.value} type="button" onClick={() => setCondition(c.value)}
-              className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all text-center ${condition === c.value ? "border-amber-500 bg-amber-50" : "border-stone-200 hover:border-stone-300 bg-stone-50"}`}>
-              <span className={`text-sm font-semibold ${condition === c.value ? "text-amber-800" : "text-stone-700"}`}>{c.label}</span>
-              <span className="text-xs text-stone-400 leading-tight">{c.desc}</span>
+              className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all text-center
+                ${condition === c.value
+                  ? "border-[#F5A623] bg-[#F5A623]/10"
+                  : "border-[#2a2a2a] hover:border-[#3a3a3a] bg-[#141414]"}`}>
+              <span className={`text-sm font-semibold ${condition === c.value ? "text-[#F5A623]" : "text-[#a0a0a0]"}`}>{c.label}</span>
+              <span className="text-xs text-[#555] leading-tight">{c.desc}</span>
             </button>
           ))}
         </div>
       </section>
 
-      <section className="bg-white rounded-2xl border border-stone-200 p-5">
-        <h2 className="font-bold text-stone-800 mb-4">מחיר</h2>
-        <div className="relative">
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 font-bold">₪</span>
-          <input type="number" min="1" step="1" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0" dir="ltr"
-            className="w-full pr-9 pl-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition text-xl font-bold text-center"
-            required />
+      <section className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-5 space-y-4">
+        <h2 className="font-bold text-[#F0F0F0]">קטגוריה</h2>
+        <div className="grid grid-cols-3 gap-2">
+          {CATEGORIES.map((cat: any) => (
+            <button key={cat.value} type="button" onClick={() => setCategory(cat.value)}
+              className={`px-3 py-2 rounded-xl border text-sm font-medium transition-all
+                ${category === cat.value
+                  ? "border-[#4ECDC4] bg-[#4ECDC4]/10 text-[#4ECDC4]"
+                  : "border-[#2a2a2a] bg-[#141414] text-[#888] hover:border-[#3a3a3a]"}`}>
+              {cat.label}
+            </button>
+          ))}
         </div>
-        <p className="text-xs text-stone-400 mt-2 text-center">קבע מחיר הוגן לשני הצדדים</p>
+      </section>
+
+      <section className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-[#F0F0F0]">מחיר</h2>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <span className="text-sm text-[#888]">למסירה חינם</span>
+            <div
+              onClick={() => setIsFree(!isFree)}
+              className={`w-10 h-5.5 rounded-full relative transition-colors cursor-pointer ${isFree ? "bg-[#4ECDC4]" : "bg-[#3a3a3a]"}`}
+              style={{ height: "22px" }}
+            >
+              <span
+                className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${isFree ? "right-0.5" : "left-0.5"}`}
+              />
+            </div>
+          </label>
+        </div>
+        {isFree ? (
+          <div className="text-center py-3 text-[#4ECDC4] font-bold text-lg">למסירה חינם</div>
+        ) : (
+          <>
+            <div className="relative">
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#555] font-bold">₪</span>
+              <input type="number" min="0" step="1" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0" dir="ltr"
+                className="w-full pr-9 pl-4 py-3 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] placeholder:text-[#555] outline-none focus:border-[#F5A623] focus:ring-2 focus:ring-[#F5A623]/20 transition text-xl font-bold text-center"
+              />
+            </div>
+            <p className="text-xs text-[#555] mt-2 text-center">קבע מחיר הוגן לשני הצדדים</p>
+          </>
+        )}
       </section>
 
       {formError && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">
+        <div className="bg-red-900/30 border border-red-800 rounded-xl px-4 py-3 text-sm text-red-400">
           {formError}
           {formError.includes("להתחבר") && (
             <Link href="/login" className="mr-2 font-semibold underline">כניסה →</Link>
@@ -97,7 +147,7 @@ function ListingFormSections({
       )}
 
       <button type="submit" disabled={submitting}
-        className="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors text-white font-bold py-4 rounded-2xl text-lg">
+        className="w-full bg-[#F5A623] hover:bg-[#e0941a] active:bg-[#c07f14] disabled:opacity-60 disabled:cursor-not-allowed transition-colors text-black font-bold py-4 rounded-2xl text-lg">
         {submitting ? (
           <span className="flex items-center justify-center gap-2"><Spinner className="w-5 h-5" />מפרסם...</span>
         ) : "פרסם ספר"}
@@ -141,23 +191,23 @@ function MobileListingModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-xl">
-        <h3 className="font-bold text-stone-900 text-lg mb-1">
+      <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
+        <h3 className="font-bold text-[#F0F0F0] text-lg mb-1">
           {smsSent ? "קישור נשלח ב-SMS" : "סרוק עם הנייד"}
         </h3>
-        <p className="text-stone-500 text-sm mb-4">
+        <p className="text-[#888] text-sm mb-4">
           {smsSent ? "פתח את הקישור בנייד לסריקת ברקוד הספר" : "סרוק את הקוד עם הנייד לסריקת ברקוד הספר"}
         </p>
         {qrDataUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={qrDataUrl} alt="QR" className="w-48 h-48 mx-auto mb-4 rounded-xl border border-stone-100" />
+          <img src={qrDataUrl} alt="QR" className="w-48 h-48 mx-auto mb-4 rounded-xl border border-[#2a2a2a]" />
         ) : (
-          <div className="w-48 h-48 mx-auto mb-4 rounded-xl bg-stone-100 animate-pulse" />
+          <div className="w-48 h-48 mx-auto mb-4 rounded-xl bg-[#2a2a2a] animate-pulse" />
         )}
-        <div className="flex items-center justify-center gap-2 text-amber-600 text-sm mb-5">
+        <div className="flex items-center justify-center gap-2 text-[#F5A623] text-sm mb-5">
           <Spinner />ממתין לסריקה מהנייד...
         </div>
-        <button onClick={onClose} className="text-stone-400 hover:text-stone-600 text-sm transition-colors">ביטול</button>
+        <button onClick={onClose} className="text-[#555] hover:text-[#888] text-sm transition-colors">ביטול</button>
       </div>
     </div>
   );
@@ -174,7 +224,6 @@ function MobileSell() {
   const [foundBook, setFoundBook] = useState<Book | null>(null);
   const [resolvedBook, setResolvedBook] = useState<ResolvedBook | null>(null);
 
-  // Manual entry fields
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [rawImage, setRawImage] = useState<string | null>(null);
@@ -183,9 +232,10 @@ function MobileSell() {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
-  // Listing details
   const [condition, setCondition] = useState<Condition>("good");
   const [price, setPrice] = useState("");
+  const [isFree, setIsFree] = useState(false);
+  const [category, setCategory] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -195,12 +245,8 @@ function MobileSell() {
     try {
       const res = await fetch(`/api/books/search?isbn=${encodeURIComponent(isbn.replace(/[-\s]/g, ""))}`);
       const book = await res.json();
-      if (book?.id) {
-        setFoundBook(book);
-        setStep("found");
-      } else {
-        setStep("manual");
-      }
+      if (book?.id) { setFoundBook(book); setStep("found"); }
+      else setStep("manual");
     } catch {
       setStep("manual");
     }
@@ -230,8 +276,7 @@ function MobileSell() {
   };
 
   const resetToScan = () => {
-    setFoundBook(null);
-    setResolvedBook(null);
+    setFoundBook(null); setResolvedBook(null);
     setTitle(""); setAuthor(""); setCoverImage(null); setManualError("");
     setStep("scanning");
   };
@@ -240,12 +285,18 @@ function MobileSell() {
     e.preventDefault();
     setFormError("");
     if (!resolvedBook) return;
-    const parsedPrice = parseFloat(price);
-    if (!price || isNaN(parsedPrice) || parsedPrice <= 0) { setFormError("יש להזין מחיר תקין"); return; }
+    if (!isFree) {
+      const parsedPrice = parseFloat(price);
+      if (!price || isNaN(parsedPrice) || parsedPrice < 0) { setFormError("יש להזין מחיר תקין"); return; }
+    }
 
     setSubmitting(true);
     try {
-      const body: Record<string, unknown> = { condition, price };
+      const body: Record<string, unknown> = {
+        condition,
+        price: isFree ? null : price,
+        category: category || null,
+      };
       if (resolvedBook.bookId) {
         body.bookId = resolvedBook.bookId;
       } else {
@@ -274,16 +325,12 @@ function MobileSell() {
     }
   };
 
-  // Full-screen states
-  if (step === "scanning") {
-    return <BarcodeScanner onScan={handleScan} onClose={() => setStep("manual")} />;
-  }
-
+  if (step === "scanning") return <BarcodeScanner onScan={handleScan} onClose={() => setStep("manual")} />;
   if (step === "looking-up") {
     return (
-      <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center gap-3">
-        <Spinner className="w-10 h-10 text-amber-600" />
-        <p className="text-stone-500 text-sm">מחפש ספר...</p>
+      <div className="min-h-screen bg-[#0f0f0f] flex flex-col items-center justify-center gap-3">
+        <Spinner className="w-10 h-10 text-[#F5A623]" />
+        <p className="text-[#888] text-sm">מחפש ספר...</p>
       </div>
     );
   }
@@ -297,49 +344,44 @@ function MobileSell() {
           onCancel={() => setRawImage(null)}
         />
       )}
-
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-[#0f0f0f]">
         <Header />
-        <main className="flex-1 bg-stone-50 py-8 px-4">
+        <main className="flex-1 py-8 px-4">
           <div className="max-w-lg mx-auto">
-
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-stone-900">פרסום ספר למכירה</h1>
+              <h1 className="text-2xl font-bold text-[#F0F0F0]">פרסום ספר למכירה</h1>
             </div>
 
-            {/* ── Book step: found or manual ─────────────────────────── */}
             {(step === "found" || step === "manual") && (
               <div className="space-y-5">
-                <section className="bg-white rounded-2xl border border-stone-200 p-5 space-y-4">
-                  <h2 className="font-bold text-stone-800">פרטי הספר</h2>
+                <section className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-5 space-y-4">
+                  <h2 className="font-bold text-[#F0F0F0]">פרטי הספר</h2>
 
                   {step === "found" && foundBook && (
                     <>
                       <div className="flex gap-4 items-start">
-                        <div className="w-16 h-24 rounded-xl overflow-hidden shrink-0 bg-amber-100 flex items-center justify-center">
+                        <div className="w-16 h-24 rounded-xl overflow-hidden shrink-0 bg-[#2a2a2a] flex items-center justify-center">
                           {foundBook.cover_image ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={foundBook.cover_image} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-2xl opacity-40">📕</span>
-                          )}
+                          ) : <span className="text-2xl opacity-40">📕</span>}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-emerald-600 text-xs font-medium">✓ הספר נמצא</span>
+                            <span className="text-emerald-400 text-xs font-medium">✓ הספר נמצא</span>
                           </div>
-                          <p className="font-bold text-stone-900 leading-snug">{foundBook.title}</p>
-                          <p className="text-stone-500 text-sm mt-0.5">{foundBook.author}</p>
-                          {foundBook.isbn && <p className="text-stone-400 text-xs mt-1.5 font-mono">{foundBook.isbn}</p>}
+                          <p className="font-bold text-[#F0F0F0] leading-snug">{foundBook.title}</p>
+                          <p className="text-[#888] text-sm mt-0.5">{foundBook.author}</p>
+                          {foundBook.isbn && <p className="text-[#555] text-xs mt-1.5 font-mono">{foundBook.isbn}</p>}
                         </div>
                       </div>
                       <div className="flex gap-2">
                         <button type="button" onClick={confirmFound}
-                          className="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-colors">
+                          className="flex-1 py-3 bg-[#F5A623] hover:bg-[#e0941a] text-black font-bold rounded-xl transition-colors">
                           המשך לפרסום
                         </button>
                         <button type="button" onClick={resetToScan}
-                          className="px-4 py-3 border border-stone-200 hover:bg-stone-50 text-stone-600 font-medium rounded-xl transition-colors text-sm">
+                          className="px-4 py-3 border border-[#2a2a2a] hover:bg-[#2a2a2a] text-[#888] font-medium rounded-xl transition-colors text-sm">
                           סרוק מחדש
                         </button>
                       </div>
@@ -349,37 +391,37 @@ function MobileSell() {
                   {step === "manual" && (
                     <>
                       {scannedISBN ? (
-                        <p className="text-xs text-stone-400 bg-stone-50 rounded-lg px-3 py-1.5 font-mono">
+                        <p className="text-xs text-[#888] bg-[#141414] rounded-lg px-3 py-1.5 font-mono">
                           ISBN {scannedISBN} — לא נמצא במאגר
                         </p>
                       ) : (
-                        <p className="text-xs text-stone-500">הספר לא נמצא. מלא את הפרטים ידנית.</p>
+                        <p className="text-xs text-[#888]">הספר לא נמצא. מלא את הפרטים ידנית.</p>
                       )}
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-sm font-medium text-stone-700 mb-1.5">שם הספר *</label>
+                          <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">שם הספר *</label>
                           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="הארי פוטר"
-                            className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition text-sm" />
+                            className="w-full px-4 py-2.5 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] placeholder:text-[#555] outline-none focus:border-[#F5A623] transition text-sm" />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-stone-700 mb-1.5">סופר *</label>
+                          <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">סופר *</label>
                           <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="ג'יי קיי רולינג"
-                            className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition text-sm" />
+                            className="w-full px-4 py-2.5 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] placeholder:text-[#555] outline-none focus:border-[#F5A623] transition text-sm" />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-stone-700 mb-1.5">תמונת עטיפה</label>
+                          <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">תמונת עטיפה</label>
                           <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
                           <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                           {coverImage ? (
                             <div className="flex items-center gap-3">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={coverImage} alt="עטיפה" className="w-14 h-20 object-cover rounded-xl shadow-sm" />
-                              <button type="button" onClick={() => setCoverImage(null)} className="text-sm text-stone-400 hover:text-red-500 transition-colors">הסר</button>
+                              <button type="button" onClick={() => setCoverImage(null)} className="text-sm text-[#555] hover:text-red-400 transition-colors">הסר</button>
                             </div>
                           ) : (
                             <div className="flex gap-2">
                               <button type="button" onClick={() => cameraRef.current?.click()}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-xl transition-colors">
+                                className="flex items-center gap-2 px-4 py-2.5 bg-[#F5A623] hover:bg-[#e0941a] text-black text-sm font-medium rounded-xl transition-colors">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                   <circle cx="12" cy="13" r="3" />
@@ -387,7 +429,7 @@ function MobileSell() {
                                 צלם
                               </button>
                               <button type="button" onClick={() => galleryRef.current?.click()}
-                                className="flex items-center gap-2 px-4 py-2.5 border border-stone-200 hover:bg-stone-50 text-stone-700 text-sm font-medium rounded-xl transition-colors">
+                                className="flex items-center gap-2 px-4 py-2.5 border border-[#2a2a2a] hover:bg-[#2a2a2a] text-[#a0a0a0] text-sm font-medium rounded-xl transition-colors">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                   <rect x="3" y="3" width="18" height="18" rx="2" />
                                   <circle cx="8.5" cy="8.5" r="1.5" />
@@ -399,14 +441,14 @@ function MobileSell() {
                           )}
                         </div>
                       </div>
-                      {manualError && <p className="text-sm text-red-600">{manualError}</p>}
+                      {manualError && <p className="text-sm text-red-400">{manualError}</p>}
                       <div className="flex gap-2">
                         <button type="button" onClick={confirmManual}
-                          className="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-colors">
+                          className="flex-1 py-3 bg-[#F5A623] hover:bg-[#e0941a] text-black font-bold rounded-xl transition-colors">
                           המשך לפרסום
                         </button>
                         <button type="button" onClick={resetToScan}
-                          className="px-4 py-3 border border-stone-200 hover:bg-stone-50 text-stone-600 font-medium rounded-xl transition-colors text-sm">
+                          className="px-4 py-3 border border-[#2a2a2a] hover:bg-[#2a2a2a] text-[#888] font-medium rounded-xl transition-colors text-sm">
                           סרוק מחדש
                         </button>
                       </div>
@@ -416,10 +458,9 @@ function MobileSell() {
               </div>
             )}
 
-            {/* ── Listing step ───────────────────────────────────────── */}
             {step === "listing" && resolvedBook && (
               <form onSubmit={handleSubmit} className="space-y-5">
-                <section className="bg-white rounded-2xl border border-stone-200 p-5">
+                <section className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-5">
                   <div className="flex items-center gap-3">
                     {resolvedBook.cover_image && (
                       <div className="w-10 h-14 rounded-lg overflow-hidden shrink-0">
@@ -427,26 +468,27 @@ function MobileSell() {
                         <img src={resolvedBook.cover_image} alt="" className="w-full h-full object-cover" />
                       </div>
                     )}
-                    <span className="text-emerald-600 text-lg">✓</span>
+                    <span className="text-emerald-400 text-lg">✓</span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-stone-900 text-sm truncate">{resolvedBook.title}</p>
-                      <p className="text-xs text-stone-500">{resolvedBook.author}</p>
+                      <p className="font-semibold text-[#F0F0F0] text-sm truncate">{resolvedBook.title}</p>
+                      <p className="text-xs text-[#888]">{resolvedBook.author}</p>
                     </div>
                     <button type="button" onClick={resetToScan}
-                      className="text-xs text-stone-400 hover:text-stone-600 shrink-0 transition-colors">שנה</button>
+                      className="text-xs text-[#555] hover:text-[#888] shrink-0 transition-colors">שנה</button>
                   </div>
                 </section>
                 <ListingFormSections
                   condition={condition} setCondition={setCondition}
                   price={price} setPrice={setPrice}
+                  isFree={isFree} setIsFree={setIsFree}
+                  category={category} setCategory={setCategory}
                   submitting={submitting} formError={formError}
                 />
               </form>
             )}
-
           </div>
         </main>
-        <footer className="bg-stone-900 text-stone-400 py-8 px-4 text-center text-sm">
+        <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-8 px-4 text-center text-sm">
           <p>© 2026 הספרייה — קנה ומכור ספרים יד שנייה בישראל</p>
         </footer>
       </div>
@@ -472,6 +514,8 @@ function DesktopSell() {
 
   const [condition, setCondition] = useState<Condition>("good");
   const [price, setPrice] = useState("");
+  const [isFree, setIsFree] = useState(false);
+  const [category, setCategory] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -482,7 +526,8 @@ function DesktopSell() {
     try {
       const res = await fetch(`/api/books/search?q=${encodeURIComponent(q)}`);
       const data: Book[] = await res.json();
-      if (data.length > 0) { setSearchResults(data); } else { setNotFound(true); }
+      if (data.length > 0) setSearchResults(data);
+      else setNotFound(true);
     } catch {
       setNotFound(true);
     } finally {
@@ -527,12 +572,18 @@ function DesktopSell() {
     e.preventDefault();
     setFormError("");
     if (!resolvedBook) { setFormError("יש לבחור ספר תחילה"); return; }
-    const parsedPrice = parseFloat(price);
-    if (!price || isNaN(parsedPrice) || parsedPrice <= 0) { setFormError("יש להזין מחיר תקין"); return; }
+    if (!isFree) {
+      const parsedPrice = parseFloat(price);
+      if (!price || isNaN(parsedPrice) || parsedPrice < 0) { setFormError("יש להזין מחיר תקין"); return; }
+    }
 
     setSubmitting(true);
     try {
-      const body: Record<string, unknown> = { condition, price };
+      const body: Record<string, unknown> = {
+        condition,
+        price: isFree ? null : price,
+        category: category || null,
+      };
       if (resolvedBook.bookId) {
         body.bookId = resolvedBook.bookId;
       } else {
@@ -572,36 +623,35 @@ function DesktopSell() {
         />
       )}
 
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-[#0f0f0f]">
         <Header />
-        <main className="flex-1 bg-stone-50 py-10 px-4">
+        <main className="flex-1 py-10 px-4">
           <div className="max-w-lg mx-auto">
-
             <div className="mb-8">
-              <h1 className="text-2xl font-bold text-stone-900">פרסום ספר למכירה</h1>
-              <p className="text-stone-500 text-sm mt-1">מלא את הפרטים ופרסם בחינם</p>
+              <h1 className="text-2xl font-bold text-[#F0F0F0]">פרסום ספר למכירה</h1>
+              <p className="text-[#888] text-sm mt-1">מלא את הפרטים ופרסם בחינם</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              <section className="bg-white rounded-2xl border border-stone-200 p-5 space-y-4">
-                <h2 className="font-bold text-stone-800">פרטי הספר</h2>
+              <section className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-5 space-y-4">
+                <h2 className="font-bold text-[#F0F0F0]">פרטי הספר</h2>
 
                 {resolvedBook ? (
-                  <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                  <div className="flex items-center gap-3 bg-emerald-900/20 border border-emerald-800 rounded-xl p-3">
                     {resolvedBook.cover_image && (
                       <div className="w-10 h-14 rounded-lg overflow-hidden shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={resolvedBook.cover_image} alt="" className="w-full h-full object-cover" />
                       </div>
                     )}
-                    <span className="text-emerald-600 text-lg">✓</span>
+                    <span className="text-emerald-400 text-lg">✓</span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-stone-900 text-sm truncate">{resolvedBook.title}</p>
-                      <p className="text-xs text-stone-500">{resolvedBook.author}</p>
+                      <p className="font-semibold text-[#F0F0F0] text-sm truncate">{resolvedBook.title}</p>
+                      <p className="text-xs text-[#888]">{resolvedBook.author}</p>
                     </div>
                     <button type="button"
                       onClick={() => { setResolvedBook(null); setSearchQuery(""); setNotFound(false); setSearchResults([]); }}
-                      className="text-xs text-stone-400 hover:text-stone-600 shrink-0 transition-colors">שנה</button>
+                      className="text-xs text-[#555] hover:text-[#888] shrink-0 transition-colors">שנה</button>
                   </div>
                 ) : (
                   <div ref={searchContainerRef}>
@@ -611,21 +661,21 @@ function DesktopSell() {
                         value={searchQuery}
                         onChange={(e) => { setSearchQuery(e.target.value); setSearchResults([]); setNotFound(false); }}
                         placeholder="חפש לפי שם ספר"
-                        className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition text-sm"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] placeholder:text-[#555] outline-none focus:border-[#F5A623] transition text-sm"
                         autoComplete="off"
                       />
                       {searching && (
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-amber-600">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#F5A623]">
                           <Spinner />
                         </div>
                       )}
                       {searchResults.length > 0 && (
-                        <div className="absolute z-20 top-full mt-1 w-full bg-white border border-stone-200 rounded-xl shadow-lg overflow-hidden divide-y divide-stone-100">
+                        <div className="absolute z-20 top-full mt-1 w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl shadow-2xl overflow-hidden divide-y divide-[#2a2a2a]">
                           {searchResults.map((b: any) => (
                             <button key={b.id} type="button"
                               onClick={() => { setResolvedBook({ bookId: b.id, isbn: b.isbn, title: b.title, author: b.author, cover_image: b.cover_image }); setSearchResults([]); }}
-                              className="w-full flex items-center gap-3 px-3 py-3 hover:bg-amber-50 transition-colors text-right">
-                              <div className="w-8 h-10 rounded bg-amber-100 overflow-hidden shrink-0">
+                              className="w-full flex items-center gap-3 px-3 py-3 hover:bg-[#2a2a2a] transition-colors text-right">
+                              <div className="w-8 h-10 rounded bg-[#2a2a2a] overflow-hidden shrink-0">
                                 {b.cover_image ? (
                                   // eslint-disable-next-line @next/next/no-img-element
                                   <img src={b.cover_image} alt="" className="w-full h-full object-cover" />
@@ -634,8 +684,8 @@ function DesktopSell() {
                                 )}
                               </div>
                               <div className="flex-1 min-w-0 text-right">
-                                <p className="font-medium text-stone-900 text-sm truncate">{b.title}</p>
-                                <p className="text-xs text-stone-400 truncate">{b.author}</p>
+                                <p className="font-medium text-[#F0F0F0] text-sm truncate">{b.title}</p>
+                                <p className="text-xs text-[#888] truncate">{b.author}</p>
                               </div>
                             </button>
                           ))}
@@ -644,13 +694,13 @@ function DesktopSell() {
                     </div>
 
                     {notFound && !mobileToken && (
-                      <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
-                        <p className="text-amber-900 text-sm leading-relaxed">
+                      <div className="mt-4 bg-[#F5A623]/5 border border-[#F5A623]/20 rounded-xl p-4">
+                        <p className="text-[#a0a0a0] text-sm leading-relaxed">
                           הספר לא נמצא במאגר שלנו. כדי להוסיף אותו, סרוק את הברקוד עם הנייד שלך.
                         </p>
                         <div className="flex gap-2 mt-3 flex-wrap">
                           <button type="button" onClick={() => requestMobileToken(false)} disabled={requestingToken}
-                            className="flex items-center gap-2 px-4 py-2.5 border border-amber-300 bg-white hover:bg-amber-50 text-amber-800 text-sm font-medium rounded-xl transition-colors disabled:opacity-50">
+                            className="flex items-center gap-2 px-4 py-2.5 border border-[#F5A623]/30 bg-[#F5A623]/5 hover:bg-[#F5A623]/10 text-[#F5A623] text-sm font-medium rounded-xl transition-colors disabled:opacity-50">
                             {requestingToken ? <Spinner /> : (
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -659,7 +709,7 @@ function DesktopSell() {
                             סרוק QR עם הנייד
                           </button>
                           <button type="button" onClick={() => requestMobileToken(true)} disabled={requestingToken}
-                            className="flex items-center gap-2 px-4 py-2.5 border border-amber-300 bg-white hover:bg-amber-50 text-amber-800 text-sm font-medium rounded-xl transition-colors disabled:opacity-50">
+                            className="flex items-center gap-2 px-4 py-2.5 border border-[#F5A623]/30 bg-[#F5A623]/5 hover:bg-[#F5A623]/10 text-[#F5A623] text-sm font-medium rounded-xl transition-colors disabled:opacity-50">
                             {requestingToken ? <Spinner /> : (
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -678,13 +728,15 @@ function DesktopSell() {
                 <ListingFormSections
                   condition={condition} setCondition={setCondition}
                   price={price} setPrice={setPrice}
+                  isFree={isFree} setIsFree={setIsFree}
+                  category={category} setCategory={setCategory}
                   submitting={submitting} formError={formError}
                 />
               )}
             </form>
           </div>
         </main>
-        <footer className="bg-stone-900 text-stone-400 py-8 px-4 text-center text-sm">
+        <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-8 px-4 text-center text-sm">
           <p>© 2026 הספרייה — קנה ומכור ספרים יד שנייה בישראל</p>
         </footer>
       </div>
@@ -692,15 +744,31 @@ function DesktopSell() {
   );
 }
 
-// ─── Shell: detect device, render correct flow ────────────────────────────────
+// ─── Shell: auth check + device detection ─────────────────────────────────────
 
 export default function SellPage() {
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setIsMobile(/iPhone|iPad|Android/i.test(navigator.userAgent));
-  }, []);
+    const mobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    setIsMobile(mobile);
 
-  if (isMobile === null) return <div className="min-h-screen bg-stone-50" />;
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((user) => {
+        if (!user?.id) {
+          router.replace("/register?redirect=/sell");
+        } else {
+          setReady(true);
+        }
+      })
+      .catch(() => {
+        router.replace("/register?redirect=/sell");
+      });
+  }, [router]);
+
+  if (!ready) return <div className="min-h-screen bg-[#0f0f0f]" />;
   return isMobile ? <MobileSell /> : <DesktopSell />;
 }

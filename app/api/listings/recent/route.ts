@@ -1,16 +1,30 @@
-// recent listings endpoint
 import { prisma } from "@/lib/db";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const city = searchParams.get("city");
+
+  const cityFilter =
+    city && city !== "כל הארץ"
+      ? {
+          seller: {
+            OR: [
+              { address: { contains: city, mode: "insensitive" as const } },
+              { city: { contains: city, mode: "insensitive" as const } },
+            ],
+          },
+        }
+      : {};
+
   try {
     const listings = await prisma.listing.findMany({
-      where: { status: "available" },
+      where: { status: "available", ...cityFilter },
       include: {
         book: { select: { id: true, title: true, author: true, cover_image: true } },
         seller: { select: { address: true, city: true } },
       },
       orderBy: { created_at: "desc" },
-      take: 8,
+      take: 12,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,7 +34,7 @@ export async function GET() {
       title: l.book.title,
       author: l.book.author,
       cover_image: l.book.cover_image,
-      price: Number(l.price),
+      price: l.price !== null ? Number(l.price) : null,
       condition: l.condition,
       location: l.seller.address ?? l.seller.city ?? null,
     }));

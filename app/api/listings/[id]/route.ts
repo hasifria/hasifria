@@ -18,12 +18,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (listing.seller_id !== session.userId) return Response.json({ error: "אין הרשאה" }, { status: 403 });
 
     const body = await req.json();
-    const data: { price?: number; status?: "available" | "sold" } = {};
+    const data: { price?: number | null; status?: "available" | "sold" } = {};
 
-    if (body.price !== undefined) {
-      const p = parseFloat(body.price);
-      if (isNaN(p) || p <= 0) return Response.json({ error: "מחיר לא תקין" }, { status: 400 });
-      data.price = p;
+    if ("price" in body) {
+      if (body.price === null || body.price === "") {
+        data.price = null;
+      } else {
+        const p = parseFloat(body.price);
+        if (isNaN(p) || p < 0) return Response.json({ error: "מחיר לא תקין" }, { status: 400 });
+        data.price = p;
+      }
     }
     if (body.status !== undefined) {
       if (!["available", "sold"].includes(body.status)) return Response.json({ error: "סטטוס לא תקין" }, { status: 400 });
@@ -31,7 +35,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     const updated = await prisma.listing.update({ where: { id }, data });
-    return Response.json(updated);
+    return Response.json({ ...updated, price: (updated as any).price !== null ? Number((updated as any).price) : null });
   } catch (err) {
     console.error("[listings PATCH]", err);
     return Response.json({ error: "שגיאת שרת" }, { status: 500 });
@@ -48,6 +52,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     if (!listing) return Response.json({ error: "מודעה לא נמצאה" }, { status: 404 });
     if (listing.seller_id !== session.userId) return Response.json({ error: "אין הרשאה" }, { status: 403 });
 
+    // Delete dependent likes first
+    await prisma.like.deleteMany({ where: { listing_id: id } });
     await prisma.listing.delete({ where: { id } });
     return Response.json({ success: true });
   } catch (err) {
