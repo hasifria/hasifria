@@ -69,3 +69,11 @@ model CoverUpload {
 
   @@map("cover_uploads")
 }
+
+model MobileListingSession {
+  token      String   @id
+  book_data  String?  @db.Text
+  created_at DateTime @default(now())
+
+  @@map("mobile_listing_sessions")
+}
