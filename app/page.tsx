@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: seo.title_template,
       description: seo.description_template,
-      images: ["/hasifria_logo.jpg"],
+      images: [seo.og_image || "/hasifria_logo.jpg"],
     },
   };
 }

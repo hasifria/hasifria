@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: book.cover_image ? [book.cover_image] : ["/hasifria_logo.jpg"],
+      images: [seo.og_image || book.cover_image || "/hasifria_logo.jpg"],
       url: `https://hasifria-roan.vercel.app/books/${id}`,
     },
   };

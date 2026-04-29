@@ -107,6 +107,7 @@ model SeoSetting {
   page_type            String   @unique
   title_template       String
   description_template String
+  og_image             String?
   updated_at           DateTime @updatedAt
 
   @@map("seo_settings")

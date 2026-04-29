@@ -6,6 +6,7 @@ type SeoRow = {
   page_type: string;
   title_template: string;
   description_template: string;
+  og_image: string | null;
 };
 
 const PAGE_LABELS: Record<string, { label: string; vars: string[] }> = {
@@ -13,6 +14,8 @@ const PAGE_LABELS: Record<string, { label: string; vars: string[] }> = {
   book:   { label: "דף ספר",     vars: ["{title}", "{author}", "{price}", "{city}"] },
   author: { label: "דף סופר",    vars: ["{author}"] },
 };
+
+const SITE_LOGO = "/hasifria_logo.jpg";
 
 export default function AdminSeoPage() {
   const [rows, setRows] = useState<SeoRow[]>([]);
@@ -23,7 +26,7 @@ export default function AdminSeoPage() {
     fetch("/api/admin/seo").then((r) => r.json()).then(setRows).catch(() => {});
   }, []);
 
-  const update = (pageType: string, field: "title_template" | "description_template", val: string) => {
+  const update = (pageType: string, field: keyof SeoRow, val: string | null) => {
     setRows((prev) => prev.map((r) => r.page_type === pageType ? { ...r, [field]: val } : r));
   };
 
@@ -80,8 +83,46 @@ export default function AdminSeoPage() {
                     dir="rtl"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">תמונת og:image</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={row.og_image ?? ""}
+                      onChange={(e) => update(row.page_type, "og_image", e.target.value || null)}
+                      placeholder="הדבק כתובת URL של תמונה..."
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] outline-none focus:border-[#F5A623] transition text-sm"
+                      dir="ltr"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => update(row.page_type, "og_image", SITE_LOGO)}
+                      className="shrink-0 px-3 py-2.5 text-xs font-medium border border-[#3a3a3a] hover:border-[#F5A623] text-[#888] hover:text-[#F5A623] rounded-xl transition-colors whitespace-nowrap"
+                    >
+                      השתמש בלוגו
+                    </button>
+                  </div>
+                  {row.og_image && (
+                    <div className="mt-3 flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={row.og_image}
+                        alt=""
+                        className="w-20 h-11 object-cover rounded-lg border border-[#3a3a3a] bg-[#2a2a2a]"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => update(row.page_type, "og_image", null)}
+                        className="text-xs text-[#555] hover:text-red-400 transition-colors"
+                      >
+                        הסר
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3 mt-4">
+              <div className="flex items-center gap-3 mt-5">
                 <button
                   onClick={() => save(row)}
                   disabled={saving === row.page_type}

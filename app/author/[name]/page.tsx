@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const seo = await getSeoTemplates("author");
   const title = fillTemplate(seo.title_template, { author: decoded });
   const description = fillTemplate(seo.description_template, { author: decoded });
-  return { title, description, openGraph: { title, description } };
+  return { title, description, openGraph: { title, description, images: [seo.og_image || "/hasifria_logo.jpg"] } };
 }
 
 export default async function AuthorPage({ params }: Props) {

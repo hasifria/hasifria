@@ -21,10 +21,14 @@ export async function getSeoTemplates(pageType: PageType) {
   try {
     const setting = await prisma.seoSetting.findUnique({ where: { page_type: pageType } });
     if (setting) {
-      return { title_template: setting.title_template, description_template: setting.description_template };
+      return {
+        title_template: setting.title_template,
+        description_template: setting.description_template,
+        og_image: setting.og_image ?? null,
+      };
     }
   } catch { /* fall through to defaults */ }
-  return SEO_DEFAULTS[pageType];
+  return { ...SEO_DEFAULTS[pageType], og_image: null };
 }
 
 export function fillTemplate(template: string, vars: Record<string, string>): string {
