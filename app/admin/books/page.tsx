@@ -8,16 +8,23 @@ type Book = {
   title: string;
   author: string;
   cover_image: string | null;
+  cover_alt: string | null;
   _count: { listings: number };
 };
 
-type EditValues = { title: string; author: string; isbn: string; cover_image: string };
+type EditValues = {
+  title: string;
+  author: string;
+  isbn: string;
+  cover_image: string;
+  cover_alt: string;
+};
 
 export default function AdminBooksPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<EditValues>({ title: "", author: "", isbn: "", cover_image: "" });
+  const [editValues, setEditValues] = useState<EditValues>({ title: "", author: "", isbn: "", cover_image: "", cover_alt: "" });
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState("");
 
@@ -35,6 +42,7 @@ export default function AdminBooksPage() {
       author: book.author,
       isbn: book.isbn ?? "",
       cover_image: book.cover_image ?? "",
+      cover_alt: book.cover_alt ?? "",
     });
   };
 
@@ -50,6 +58,7 @@ export default function AdminBooksPage() {
           author: editValues.author,
           isbn: editValues.isbn || null,
           cover_image: editValues.cover_image || null,
+          cover_alt: editValues.cover_alt || null,
         }),
       });
       if (res.ok) {
@@ -67,6 +76,9 @@ export default function AdminBooksPage() {
     const res = await fetch(`/api/admin/books/${id}`, { method: "DELETE" });
     if (res.ok) setBooks((prev) => prev.filter((b) => b.id !== id));
   };
+
+  const set = (field: keyof EditValues, val: string) =>
+    setEditValues((v) => ({ ...v, [field]: val }));
 
   const visible = filter
     ? books.filter((b) =>
@@ -100,7 +112,11 @@ export default function AdminBooksPage() {
                 <div className="w-10 h-14 rounded-lg overflow-hidden shrink-0 bg-[#2a2a2a] flex items-center justify-center border border-[#3a3a3a]">
                   {book.cover_image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={book.cover_image} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={book.cover_image}
+                      alt={book.cover_alt || `${book.title} מאת ${book.author}`}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <span className="text-lg opacity-30">📕</span>
                   )}
@@ -111,6 +127,9 @@ export default function AdminBooksPage() {
                   <p className="text-xs text-[#555] mt-0.5">
                     {book.isbn ? `ISBN: ${book.isbn} · ` : ""}
                     {book._count.listings} מודעות
+                    {book.cover_image && !book.cover_alt && (
+                      <span className="text-amber-600 mr-2">· חסר alt text</span>
+                    )}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -131,29 +150,64 @@ export default function AdminBooksPage() {
 
               {/* Inline edit form */}
               {editingId === book.id && (
-                <div className="border-t border-[#2a2a2a] p-4 bg-[#141414] grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {(["title", "author", "isbn", "cover_image"] as const).map((field) => (
-                    <div key={field}>
+                <div className="border-t border-[#2a2a2a] p-4 bg-[#141414] space-y-4">
+                  {/* Cover preview + alt text */}
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 w-16 h-24 rounded-lg overflow-hidden bg-[#2a2a2a] border border-[#3a3a3a] flex items-center justify-center">
+                      {editValues.cover_image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={editValues.cover_image}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0"; }}
+                        />
+                      ) : (
+                        <span className="text-2xl opacity-20">📕</span>
+                      )}
+                    </div>
+                    <div className="flex-1">
                       <label className="block text-xs font-medium text-[#555] mb-1">
-                        {field === "title" ? "שם ספר" : field === "author" ? "סופר" : field === "isbn" ? "ISBN" : "תמונה (URL)"}
+                        תיאור תמונה (alt text) — לנגישות ו-SEO
                       </label>
                       <input
                         type="text"
-                        value={editValues[field]}
-                        onChange={(e) => setEditValues((v) => ({ ...v, [field]: e.target.value }))}
+                        value={editValues.cover_alt}
+                        onChange={(e) => set("cover_alt", e.target.value)}
+                        placeholder={`${editValues.title || book.title} מאת ${editValues.author || book.author} — ספר יד שנייה`}
                         className="w-full px-3 py-2 rounded-lg border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] outline-none focus:border-[#F5A623] transition text-sm"
+                        dir="rtl"
                       />
+                      <p className="text-xs text-[#555] mt-1">
+                        ריק = יווצר אוטומטית: &ldquo;{editValues.title || book.title} מאת {editValues.author || book.author} — ספר יד שנייה&rdquo;
+                      </p>
                     </div>
-                  ))}
-                  <div className="sm:col-span-2">
-                    <button
-                      onClick={saveEdit}
-                      disabled={saving}
-                      className="px-5 py-2 bg-[#F5A623] hover:bg-[#e0941a] disabled:opacity-60 text-black text-sm font-bold rounded-xl transition-colors"
-                    >
-                      {saving ? "שומר..." : "שמור"}
-                    </button>
                   </div>
+
+                  {/* Other fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {(["title", "author", "isbn", "cover_image"] as const).map((field) => (
+                      <div key={field}>
+                        <label className="block text-xs font-medium text-[#555] mb-1">
+                          {field === "title" ? "שם ספר" : field === "author" ? "סופר" : field === "isbn" ? "ISBN" : "כתובת תמונה (URL)"}
+                        </label>
+                        <input
+                          type="text"
+                          value={editValues[field]}
+                          onChange={(e) => set(field, e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] outline-none focus:border-[#F5A623] transition text-sm"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={saveEdit}
+                    disabled={saving}
+                    className="px-5 py-2 bg-[#F5A623] hover:bg-[#e0941a] disabled:opacity-60 text-black text-sm font-bold rounded-xl transition-colors"
+                  >
+                    {saving ? "שומר..." : "שמור"}
+                  </button>
                 </div>
               )}
             </div>

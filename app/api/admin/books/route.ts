@@ -12,6 +12,7 @@ export async function GET() {
       title: true,
       author: true,
       cover_image: true,
+      cover_alt: true,
       _count: { select: { listings: true } },
     },
   });

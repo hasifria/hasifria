@@ -109,7 +109,7 @@ export default async function BookPage({ params }: Props) {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={book.cover_image}
-                      alt={book.title}
+                      alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שנייה`}
                       className="w-40 h-56 object-cover rounded-xl shadow-lg"
                     />
                   ) : (

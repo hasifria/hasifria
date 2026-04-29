@@ -5,7 +5,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!await requireSuperUser()) return Response.json({ error: "Forbidden" }, { status: 403 });
   const { id } = await params;
   const body = await req.json();
-  const { title, author, isbn, cover_image } = body;
+  const { title, author, isbn, cover_image, cover_alt } = body;
   const book = await prisma.book.update({
     where: { id },
     data: {
@@ -13,6 +13,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       ...(author !== undefined && { author }),
       ...(isbn !== undefined && { isbn: isbn || null }),
       ...(cover_image !== undefined && { cover_image: cover_image || null }),
+      ...(cover_alt !== undefined && { cover_alt: cover_alt || null }),
     },
   });
   return Response.json(book);

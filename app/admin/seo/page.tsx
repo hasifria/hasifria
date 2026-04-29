@@ -9,10 +9,11 @@ type SeoRow = {
   og_image: string | null;
 };
 
-const PAGE_LABELS: Record<string, { label: string; vars: string[] }> = {
-  home:   { label: "דף הבית",    vars: [] },
-  book:   { label: "דף ספר",     vars: ["{title}", "{author}", "{price}", "{city}"] },
-  author: { label: "דף סופר",    vars: ["{author}"] },
+const PAGE_LABELS: Record<string, { label: string; vars: string[]; altOnly?: boolean }> = {
+  home:           { label: "דף הבית",                        vars: [] },
+  book:           { label: "דף ספר",                         vars: ["{title}", "{author}", "{price}", "{city}"] },
+  author:         { label: "דף סופר",                        vars: ["{author}"] },
+  image_defaults: { label: "הגדרות תמונות ברירת מחדל",       vars: ["{title}", "{author}"], altOnly: true },
 };
 
 const SITE_LOGO = "/hasifria_logo.jpg";
@@ -63,27 +64,48 @@ export default function AdminSeoPage() {
                 )}
               </div>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">כותרת (title)</label>
-                  <input
-                    type="text"
-                    value={row.title_template}
-                    onChange={(e) => update(row.page_type, "title_template", e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] outline-none focus:border-[#F5A623] transition text-sm"
-                    dir="rtl"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">תיאור (description)</label>
-                  <textarea
-                    value={row.description_template}
-                    onChange={(e) => update(row.page_type, "description_template", e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] outline-none focus:border-[#F5A623] transition text-sm resize-none"
-                    dir="rtl"
-                  />
-                </div>
-                <div>
+                {meta.altOnly ? (
+                  <div>
+                    <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">
+                      תבנית alt text לתמונות ספרים
+                    </label>
+                    <input
+                      type="text"
+                      value={row.description_template}
+                      onChange={(e) => update(row.page_type, "description_template", e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] outline-none focus:border-[#F5A623] transition text-sm"
+                      dir="rtl"
+                    />
+                    <p className="text-xs text-[#555] mt-2">
+                      תבנית זו מציגה את ברירת המחדל לתיאור תמונה כאשר לא הוגדר alt text ידני לספר.
+                      משתמש ב: <span className="text-[#4ECDC4]">{"{title}"}, {"{author}"}</span>
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">כותרת (title)</label>
+                      <input
+                        type="text"
+                        value={row.title_template}
+                        onChange={(e) => update(row.page_type, "title_template", e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] outline-none focus:border-[#F5A623] transition text-sm"
+                        dir="rtl"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">תיאור (description)</label>
+                      <textarea
+                        value={row.description_template}
+                        onChange={(e) => update(row.page_type, "description_template", e.target.value)}
+                        rows={3}
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] outline-none focus:border-[#F5A623] transition text-sm resize-none"
+                        dir="rtl"
+                      />
+                    </div>
+                  </>
+                )}
+                {!meta.altOnly && <div>
                   <label className="block text-sm font-medium text-[#a0a0a0] mb-1.5">תמונת og:image</label>
                   <div className="flex items-center gap-3">
                     <input
@@ -120,7 +142,7 @@ export default function AdminSeoPage() {
                       </button>
                     </div>
                   )}
-                </div>
+                </div>}
               </div>
               <div className="flex items-center gap-3 mt-5">
                 <button

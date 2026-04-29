@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     const listings = await prisma.listing.findMany({
       where: { status: "available", ...cityFilter },
       include: {
-        book: { select: { id: true, title: true, author: true, cover_image: true } },
+        book: { select: { id: true, title: true, author: true, cover_image: true, cover_alt: true } },
         seller: { select: { address: true, city: true } },
       },
       orderBy: { created_at: "desc" },
@@ -34,6 +34,7 @@ export async function GET(req: Request) {
       title: l.book.title,
       author: l.book.author,
       cover_image: l.book.cover_image,
+      cover_alt: l.book.cover_alt,
       price: l.price !== null ? Number(l.price) : null,
       condition: l.condition,
       location: l.seller.address ?? l.seller.city ?? null,

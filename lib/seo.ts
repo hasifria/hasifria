@@ -13,6 +13,10 @@ export const SEO_DEFAULTS = {
     title_template: "ספרים מאת {author} — הספרייה",
     description_template: "כל הספרים של {author} למכירה יד שנייה בישראל.",
   },
+  image_defaults: {
+    title_template: "",
+    description_template: "{title} מאת {author} — ספר יד שנייה בישראל",
+  },
 } as const;
 
 export type PageType = keyof typeof SEO_DEFAULTS;

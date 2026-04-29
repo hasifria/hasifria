@@ -24,7 +24,7 @@ export default async function LikedPage() {
     include: {
       listing: {
         include: {
-          book: { select: { id: true, title: true, author: true, cover_image: true } },
+          book: { select: { id: true, title: true, author: true, cover_image: true, cover_alt: true } },
           seller: { select: { name: true, phone: true, address: true, city: true } },
         },
       },
@@ -41,6 +41,7 @@ export default async function LikedPage() {
       title: lk.listing.book.title,
       author: lk.listing.book.author,
       cover_image: lk.listing.book.cover_image,
+      cover_alt: lk.listing.book.cover_alt,
       price: lk.listing.price !== null ? Number(lk.listing.price) : null,
       condition: lk.listing.condition,
       sellerName: lk.listing.seller.name ?? lk.listing.seller.phone,
@@ -97,7 +98,7 @@ export default async function LikedPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={item.cover_image}
-                          alt={item.title}
+                          alt={item.cover_alt || `${item.title} מאת ${item.author} — ספר יד שנייה`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (

@@ -110,7 +110,7 @@ export default async function AuthorPage({ params }: Props) {
                     <div className="w-12 h-16 rounded-lg overflow-hidden shrink-0 bg-[#2a2a2a] flex items-center justify-center border border-[#3a3a3a]">
                       {book.cover_image ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={book.cover_image} alt={book.title} className="w-full h-full object-cover" />
+                        <img src={book.cover_image} alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שנייה`} className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-xl opacity-40">📕</span>
                       )}

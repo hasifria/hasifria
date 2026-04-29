@@ -16,6 +16,7 @@ model Book {
   genre       String?
   description String?
   cover_image String?
+  cover_alt   String?
   created_at  DateTime  @default(now())
 
   listings    Listing[]

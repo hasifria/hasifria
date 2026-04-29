@@ -57,6 +57,7 @@ export default async function SearchPage({ searchParams }: Props) {
       title: b.title,
       author: b.author,
       cover_image: b.cover_image,
+      cover_alt: b.cover_alt,
       minPrice: b.listings[0].price !== null ? Number(b.listings[0].price) : null,
       listingId: b.listings[0].id,
     }));
@@ -183,7 +184,7 @@ export default async function SearchPage({ searchParams }: Props) {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={book.cover_image}
-                            alt={book.title}
+                            alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שנייה`}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (

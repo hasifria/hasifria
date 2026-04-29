@@ -13,6 +13,7 @@ type Book = {
   author: string;
   genre: string | null;
   cover_image: string | null;
+  cover_alt: string | null;
   description: string | null;
   created_at: string;
 };
@@ -231,7 +232,7 @@ function ListingCard({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={listing.book.cover_image}
-              alt={listing.book.title}
+              alt={listing.book.cover_alt || `${listing.book.title} מאת ${listing.book.author} — ספר יד שנייה`}
               className="w-16 h-24 object-cover rounded-lg shadow-sm"
             />
           ) : (

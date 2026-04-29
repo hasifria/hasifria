@@ -45,6 +45,7 @@ type RecentListing = {
   title: string;
   author: string;
   cover_image: string | null;
+  cover_alt: string | null;
   price: number | null;
   condition: string;
   location: string | null;
@@ -181,7 +182,7 @@ export default function HomeClient() {
                     <div className="bg-[#2a2a2a] aspect-[2/3] flex items-center justify-center overflow-hidden">
                       {item.cover_image ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.cover_image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src={item.cover_image} alt={item.cover_alt || `${item.title} מאת ${item.author} — ספר יד שנייה`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <span className="text-5xl opacity-20">📕</span>
                       )}
