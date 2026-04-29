@@ -1,7 +1,9 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
+import { SessionData, sessionOptions } from "@/lib/session";
+import { prisma } from "@/lib/db";
 import { Header } from "@/components/Header";
-import { requireSuperUser } from "@/lib/superuser";
 
 const ADMIN_TABS = [
   { href: "/admin/seo",      label: "SEO" },
@@ -10,8 +12,46 @@ const ADMIN_TABS = [
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const su = await requireSuperUser();
-  if (!su) redirect("/");
+  // Auth check inline — no helper dependency
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+
+  if (!session.userId) {
+    return (
+      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-8 text-center" dir="rtl">
+        <div>
+          <p className="text-2xl mb-4">🔒</p>
+          <p className="text-[#888] text-sm mb-4">יש להתחבר תחילה</p>
+          <Link href="/login?redirect=/admin/seo" className="text-[#F5A623] hover:underline text-sm">כניסה</Link>
+        </div>
+      </div>
+    );
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { phone: true } });
+  const superPhone = process.env.SUPER_USER_PHONE;
+
+  if (!superPhone) {
+    return (
+      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-8 text-center" dir="rtl">
+        <div className="bg-red-900/20 border border-red-800 rounded-2xl p-8 max-w-sm">
+          <p className="text-2xl mb-3">⚠️</p>
+          <p className="text-red-400 font-bold mb-2">SUPER_USER_PHONE לא מוגדר</p>
+          <p className="text-[#888] text-sm">הוסף את המשתנה SUPER_USER_PHONE ל-.env ול-Vercel Environment Variables</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.phone !== superPhone) {
+    return (
+      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-8 text-center" dir="rtl">
+        <div>
+          <p className="text-2xl mb-4">⛔</p>
+          <p className="text-[#888] text-sm">אין הרשאה לדף זה</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0f0f0f]">
