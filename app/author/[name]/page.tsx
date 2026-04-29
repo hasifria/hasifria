@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/Header";
 import LikeButton from "@/components/LikeButton";
+import { getSeoTemplates, fillTemplate } from "@/lib/seo";
 
 const conditionMap = {
   new:  { label: "כמו חדש",  color: "bg-emerald-900/40 text-emerald-400" },
@@ -11,6 +13,15 @@ const conditionMap = {
 };
 
 type Props = { params: Promise<{ name: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;
+  const decoded = decodeURIComponent(name);
+  const seo = await getSeoTemplates("author");
+  const title = fillTemplate(seo.title_template, { author: decoded });
+  const description = fillTemplate(seo.description_template, { author: decoded });
+  return { title, description, openGraph: { title, description } };
+}
 
 export default async function AuthorPage({ params }: Props) {
   const { name } = await params;

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-type User = { id: string; name: string | null; phone: string } | null;
+type User = { id: string; name: string | null; phone: string; isSuperUser?: boolean } | null;
 
 export function Header({ showSearch }: { showSearch?: boolean }) {
   const [user, setUser] = useState<User | "loading">("loading");
@@ -62,6 +62,14 @@ export function Header({ showSearch }: { showSearch?: boolean }) {
             <div className="w-20 h-8 bg-[#2a2a2a] rounded-lg animate-pulse" />
           ) : user ? (
             <>
+              {user.isSuperUser && (
+                <Link
+                  href="/admin/seo"
+                  className="text-sm text-[#888] hover:text-[#F5A623] font-medium transition-colors"
+                >
+                  ניהול
+                </Link>
+              )}
               <Link
                 href="/liked"
                 className="flex items-center gap-1.5 text-sm text-[#888] hover:text-[#FF4757] font-medium transition-colors"

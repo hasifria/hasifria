@@ -13,7 +13,10 @@ export async function GET() {
       select: { id: true, name: true, phone: true, city: true, address: true },
     });
 
-    return Response.json(user);
+    if (!user) return Response.json(null);
+
+    const superPhone = process.env.SUPER_USER_PHONE;
+    return Response.json({ ...user, isSuperUser: !!(superPhone && user.phone === superPhone) });
   } catch {
     return Response.json(null);
   }

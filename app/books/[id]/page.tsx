@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/Header";
 import ShareButton from "@/components/ShareButton";
 import LikeButton from "@/components/LikeButton";
+import { getSeoTemplates, fillTemplate } from "@/lib/seo";
 
 const conditionMap = {
   new:  { label: "כמו חדש",  color: "bg-emerald-900/40 text-emerald-400 border-emerald-800" },
@@ -18,6 +20,48 @@ function whatsappLink(phone: string, bookTitle: string) {
 }
 
 type Props = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const book = await prisma.book.findUnique({
+    where: { id },
+    select: {
+      title: true,
+      author: true,
+      cover_image: true,
+      listings: {
+        where: { status: "available" },
+        select: { price: true, seller: { select: { city: true, address: true } } },
+        orderBy: { price: "asc" },
+        take: 1,
+      },
+    },
+  });
+  if (!book) return { title: "ספר לא נמצא — הספרייה" };
+
+  const seo = await getSeoTemplates("book");
+  const listing = book.listings[0];
+  const price = listing?.price !== null && listing?.price !== undefined
+    ? String(Number(listing.price))
+    : "מחיר חינם";
+  const city = listing?.seller?.city
+    ?? listing?.seller?.address?.split(/[,،\-]/)[0]?.trim()
+    ?? "ישראל";
+
+  const title = fillTemplate(seo.title_template, { title: book.title, author: book.author });
+  const description = fillTemplate(seo.description_template, { title: book.title, author: book.author, price, city });
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: book.cover_image ? [book.cover_image] : ["/hasifria_logo.jpg"],
+      url: `https://hasifria-roan.vercel.app/books/${id}`,
+    },
+  };
+}
 
 export default async function BookPage({ params }: Props) {
   const { id } = await params;

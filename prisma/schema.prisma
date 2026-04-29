@@ -101,3 +101,13 @@ model MobileListingSession {
 
   @@map("mobile_listing_sessions")
 }
+
+model SeoSetting {
+  id                   String   @id @default(cuid())
+  page_type            String   @unique
+  title_template       String
+  description_template String
+  updated_at           DateTime @updatedAt
+
+  @@map("seo_settings")
+}
