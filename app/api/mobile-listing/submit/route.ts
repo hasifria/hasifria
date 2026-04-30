@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { uploadBookCover, isBase64Image } from "@/lib/cloudinary";
 
 const TOKEN_TTL_MS = 30 * 60 * 1000;
 
@@ -19,12 +20,17 @@ export async function POST(req: Request) {
       return Response.json({ error: "הקישור פג תוקף" }, { status: 410 });
     }
 
+    let coverUrl: string | null = cover_image ?? null;
+    if (coverUrl && isBase64Image(coverUrl)) {
+      coverUrl = await uploadBookCover(coverUrl, { isbn, title });
+    }
+
     const bookData = {
       ...(bookId ? { bookId } : {}),
       isbn: isbn ?? null,
       title,
       author,
-      cover_image: cover_image ?? null,
+      cover_image: coverUrl,
     };
 
     await prisma.mobileListingSession.update({

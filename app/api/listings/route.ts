@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { uploadBookCover, isBase64Image } from "@/lib/cloudinary";
 
 export async function POST(req: Request) {
   try {
@@ -28,12 +29,21 @@ export async function POST(req: Request) {
     const validCategories = ["CHILDREN", "YOUNG_ADULT", "ADULT", "EDUCATION", "HEALTH"];
     const parsedCategory = category && validCategories.includes(category) ? category : null;
 
+    // Upload base64 cover images to Cloudinary before persisting
+    let resolvedCover: string | null = cover_image || null;
+    if (resolvedCover && isBase64Image(resolvedCover)) {
+      resolvedCover = await uploadBookCover(resolvedCover, {
+        isbn: isbn?.trim() || null,
+        title: title?.trim() || null,
+      });
+    }
+
     let book;
     if (bookId) {
       book = await prisma.book.findUnique({ where: { id: bookId } });
       if (!book) return Response.json({ error: "ספר לא נמצא" }, { status: 404 });
-      if (cover_image && !book.cover_image) {
-        book = await prisma.book.update({ where: { id: bookId }, data: { cover_image } });
+      if (resolvedCover && !book.cover_image) {
+        book = await prisma.book.update({ where: { id: bookId }, data: { cover_image: resolvedCover } });
       }
     } else {
       if (!title?.trim()) return Response.json({ error: "חסר שם ספר" }, { status: 400 });
@@ -44,7 +54,7 @@ export async function POST(req: Request) {
           title: title.trim(),
           author: author.trim(),
           genre: genre?.trim() || null,
-          cover_image: cover_image || null,
+          cover_image: resolvedCover,
         },
       });
     }

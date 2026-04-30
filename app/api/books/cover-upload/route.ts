@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { uploadBookCover } from "@/lib/cloudinary";
 
 const TOKEN_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -19,9 +20,11 @@ export async function POST(req: Request) {
       return Response.json({ error: "הקישור פג תוקף. בקש קישור חדש." }, { status: 410 });
     }
 
+    const url = await uploadBookCover(imageData);
+
     await prisma.coverUpload.update({
       where: { token },
-      data: { image_data: imageData },
+      data: { image_data: url },
     });
 
     return Response.json({ success: true });
