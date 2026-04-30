@@ -8,7 +8,6 @@ type User = { id: string; name: string | null; phone: string; isSuperUser?: bool
 export function Header({ showSearch }: { showSearch?: boolean }) {
   const [user, setUser] = useState<User | "loading">("loading");
   const [query, setQuery] = useState("");
-  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -26,18 +25,13 @@ export function Header({ showSearch }: { showSearch?: boolean }) {
     <header className="bg-[#141414] border-b border-[#2a2a2a] sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          {!logoError ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src="/hasifria_logo.jpg"
-              alt="הספרייה"
-              className="h-8 w-auto rounded"
-              onError={() => setLogoError(true)}
-            />
-          ) : (
-            <span className="text-xl font-bold text-[#F5A623] tracking-tight">הספרייה</span>
-          )}
+        <Link href="/" className="shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="הספריה"
+            className="h-7 md:h-9 w-auto"
+          />
         </Link>
 
         {/* Search bar */}
