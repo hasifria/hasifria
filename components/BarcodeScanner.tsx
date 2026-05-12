@@ -74,15 +74,14 @@ export default function BarcodeScanner({
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      <div className="flex items-center justify-between px-4 pt-8 pb-4">
-        <h2 className="text-white font-bold text-lg">סרוק ברקוד</h2>
-        <button
-          onClick={() => { controlsRef.current?.stop(); onClose(); }}
-          className="text-white text-xl w-10 h-10 flex items-center justify-center rounded-full bg-white/20"
-        >
-          ✕
-        </button>
-      </div>
+      {/* Close button — top-right corner */}
+      <button
+        onClick={() => { controlsRef.current?.stop(); onClose(); }}
+        className="absolute top-4 right-4 z-10 w-11 h-11 flex items-center justify-center rounded-full bg-black/70 border border-white/20 text-white text-lg shadow-lg active:scale-95 transition-transform"
+        aria-label="סגור"
+      >
+        ✕
+      </button>
 
       <div className="flex-1 relative overflow-hidden">
         <video ref={videoRef} className="w-full h-full object-cover" muted playsInline autoPlay />
