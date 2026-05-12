@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+
+type Pos = { top: number; left: number; width: number };
 
 export default function CityAutocomplete({
   defaultValue = "",
@@ -12,6 +14,7 @@ export default function CityAutocomplete({
   const [cities, setCities] = useState<string[]>([]);
   const [value, setValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<Pos>({ top: 0, left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,15 +24,45 @@ export default function CityAutocomplete({
       .catch(() => {});
   }, []);
 
+  // Close on outside mousedown or touchstart
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    const handler = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (containerRef.current && !containerRef.current.contains(target)) {
         setOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
   }, []);
+
+  // Calculate fixed position from the container's viewport rect
+  const measurePos = useCallback(() => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+  }, []);
+
+  const openDropdown = useCallback(() => {
+    measurePos();
+    setOpen(true);
+  }, [measurePos]);
+
+  const selectCity = useCallback((city: string) => {
+    setValue(city);
+    setOpen(false);
+  }, []);
+
+  const clearCity = useCallback(() => {
+    setValue("");
+    measurePos();
+    setTimeout(() => setOpen(true), 0);
+  }, [measurePos]);
 
   const filtered = value.trim().length > 0
     ? cities.filter((c) => c.includes(value.trim()))
@@ -37,7 +70,7 @@ export default function CityAutocomplete({
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Hidden input carries the value for form submission */}
+      {/* Hidden input carries value for form submission */}
       <input type="hidden" name={name} value={value} />
 
       <div className="flex items-center gap-2 bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl px-3 focus-within:border-[#F5A623] transition min-w-[140px]">
@@ -48,9 +81,9 @@ export default function CityAutocomplete({
         <input
           type="text"
           value={value}
-          onChange={(e) => { setValue(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          onClick={() => setOpen(true)}
+          onChange={(e) => { setValue(e.target.value); openDropdown(); }}
+          onFocus={openDropdown}
+          onClick={openDropdown}
           placeholder="כל הארץ"
           autoComplete="off"
           className="w-full py-2 bg-transparent text-sm outline-none placeholder:text-[#555] text-[#F0F0F0]"
@@ -58,27 +91,28 @@ export default function CityAutocomplete({
         {value && (
           <button
             type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setValue("");
-              setTimeout(() => setOpen(true), 0);
-            }}
-            className="text-[#555] hover:text-[#888] shrink-0 text-xs"
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); clearCity(); }}
+            onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); clearCity(); }}
+            className="text-[#555] hover:text-[#888] shrink-0 p-1"
           >
             ✕
           </button>
         )}
       </div>
 
+      {/* Dropdown rendered with fixed positioning to escape stacking contexts */}
       {open && filtered.length > 0 && (
-        <div className="absolute z-30 top-full mt-1 w-full max-h-52 overflow-y-auto bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl shadow-2xl">
+        <div
+          style={{ position: "fixed", top: pos.top, left: pos.left, width: pos.width, zIndex: 9999 }}
+          className="max-h-64 overflow-y-auto bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl shadow-2xl"
+        >
           {value.trim() === "" && (
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => { setValue(""); setOpen(false); }}
-              className="w-full text-right px-4 py-2.5 text-sm text-[#888] hover:bg-[#2a2a2a] transition-colors border-b border-[#2a2a2a]"
+              onClick={() => selectCity("")}
+              onTouchEnd={(e) => { e.preventDefault(); selectCity(""); }}
+              className="w-full text-right px-4 text-sm text-[#888] hover:bg-[#2a2a2a] active:bg-[#2a2a2a] transition-colors border-b border-[#2a2a2a] flex items-center min-h-[44px]"
             >
               כל הארץ
             </button>
@@ -88,8 +122,9 @@ export default function CityAutocomplete({
               key={city}
               type="button"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => { setValue(city); setOpen(false); }}
-              className="w-full text-right px-4 py-2.5 text-sm text-[#F0F0F0] hover:bg-[#2a2a2a] transition-colors"
+              onClick={() => selectCity(city)}
+              onTouchEnd={(e) => { e.preventDefault(); selectCity(city); }}
+              className="w-full text-right px-4 text-sm text-[#F0F0F0] hover:bg-[#2a2a2a] active:bg-[#2a2a2a] transition-colors flex items-center min-h-[44px]"
             >
               {city}
             </button>
