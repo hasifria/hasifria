@@ -91,8 +91,10 @@ export default async function SearchPage({ searchParams }: Props) {
               />
             </div>
 
-            {/* Dynamic city autocomplete */}
-            <CityAutocomplete defaultValue={city} name="city" />
+            {/* City autocomplete — above search on mobile, inline on desktop */}
+            <div className="order-first sm:order-none">
+              <CityAutocomplete defaultValue={city} name="city" />
+            </div>
 
             <button
               type="submit"

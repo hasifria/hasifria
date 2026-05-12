@@ -390,25 +390,26 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
       {/* Seller profile banner */}
       <div className="bg-[#141414] border-b border-[#2a2a2a]">
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="flex items-start gap-5">
+          {/* Mobile: column centered; Desktop: row */}
+          <div className="flex flex-col items-center text-center gap-4 md:flex-row md:items-start md:text-right md:gap-5">
             <div className="w-16 h-16 rounded-full bg-[#F5A623]/10 flex items-center justify-center text-2xl font-bold text-[#F5A623] shrink-0">
               {(seller.name ?? seller.phone).charAt(0)}
             </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-[#F0F0F0] truncate">
+            <div className="md:flex-1 min-w-0">
+              <h1 className="text-2xl font-bold text-[#F0F0F0] md:truncate">
                 {seller.name ?? seller.phone}
               </h1>
               {(seller.address ?? seller.city) && (
-                <p className="text-[#888] text-sm mt-1 flex items-center gap-1">
+                <p className="flex items-center justify-center gap-1 mt-2 text-lg text-[#F0F0F0] md:text-sm md:text-[#888] md:mt-1 md:justify-start">
                   <span>📍</span>
                   <span>{seller.address ?? seller.city}</span>
                 </p>
               )}
-              <p className="text-[#555] text-sm mt-1">
+              <p className="mt-1 text-lg font-bold text-[#F5A623] md:text-sm md:font-normal md:text-[#555]">
                 {available.length} ספרים למכירה
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+            <div className="flex items-center gap-2 shrink-0 flex-wrap justify-center md:justify-end">
               <ShareButton title={`${seller.name ?? seller.phone} — הספרייה`} url={sellerPageUrl} />
               {isOwner && (
                 <Link
