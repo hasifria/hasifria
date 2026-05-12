@@ -389,7 +389,7 @@ function MobileSell() {
     );
   }
 
-  if (step === "scanning") return <BarcodeScanner onScan={handleScan} onClose={() => router.back()} />;
+  if (step === "scanning") return <BarcodeScanner onScan={handleScan} onClose={() => setStep("idle")} />;
   if (step === "looking-up") {
     return (
       <div className="min-h-screen bg-[#0f0f0f] flex flex-col items-center justify-center gap-3">
