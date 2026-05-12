@@ -47,7 +47,7 @@ export default function BarcodeScanner({
 
   if (permissionDenied) {
     return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-8 text-center" dir="rtl">
+      <div className="flex-1 flex flex-col bg-black items-center justify-center p-8 text-center" dir="rtl">
         <div className="w-16 h-16 bg-red-900/40 rounded-full flex items-center justify-center mb-5">
           <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -73,7 +73,7 @@ export default function BarcodeScanner({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+    <div className="flex-1 flex flex-col bg-black relative min-h-0">
       {/* Close button — top-right corner */}
       <button
         onClick={() => { controlsRef.current?.stop(); onClose(); }}
