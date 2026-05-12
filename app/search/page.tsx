@@ -108,7 +108,16 @@ export default async function SearchPage({ searchParams }: Props) {
         <div className="max-w-6xl mx-auto px-4 py-8">
           {!hasQuery ? (
             <div className="text-center py-24">
-              <p className="text-6xl mb-5">📚</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo-icon.png"
+                alt=""
+                aria-hidden="true"
+                width={80}
+                height={80}
+                className="mx-auto mb-5"
+                style={{ animation: "logo-pulse 1.4s ease-in-out infinite" }}
+              />
               <h2 className="text-2xl font-bold text-[#F0F0F0] mb-2">חפש ספר</h2>
               <p className="text-[#555]">הזן שם ספר, שם סופר, או בחר עיר כדי להתחיל</p>
             </div>
