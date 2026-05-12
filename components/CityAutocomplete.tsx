@@ -50,6 +50,7 @@ export default function CityAutocomplete({
           value={value}
           onChange={(e) => { setValue(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
           placeholder="כל הארץ"
           autoComplete="off"
           className="w-full py-2 bg-transparent text-sm outline-none placeholder:text-[#555] text-[#F0F0F0]"
@@ -57,7 +58,12 @@ export default function CityAutocomplete({
         {value && (
           <button
             type="button"
-            onClick={() => { setValue(""); setOpen(false); }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setValue("");
+              setTimeout(() => setOpen(true), 0);
+            }}
             className="text-[#555] hover:text-[#888] shrink-0 text-xs"
           >
             ✕

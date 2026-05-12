@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import LikeButton from "@/components/LikeButton";
+import BooksLoadingSpinner from "@/components/BooksLoadingSpinner";
 
 const CITIES = ["כל הארץ", "תל אביב", "ירושלים", "חיפה", "באר שבע", "ראשון לציון", "נס ציונה", "פתח תקווה", "אשדוד", "נתניה", "רחובות", "חולון", "בת ים", "בני ברק"];
 
@@ -55,6 +56,7 @@ export default function HomeClient() {
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("כל הארץ");
   const [recent, setRecent] = useState<RecentListing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [geoCity, setGeoCity] = useState<string | null>(null);
 
   useEffect(() => {
@@ -80,11 +82,13 @@ export default function HomeClient() {
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
     const cityParam = city !== "כל הארץ" ? `?city=${encodeURIComponent(city)}` : "";
     fetch(`/api/listings/recent${cityParam}`)
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setRecent(data); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, [city]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -166,7 +170,9 @@ export default function HomeClient() {
             </Link>
           </div>
 
-          {recent.length === 0 ? (
+          {isLoading ? (
+            <BooksLoadingSpinner />
+          ) : recent.length === 0 ? (
             <div className="text-center py-16 text-[#555]">
               <p className="text-4xl mb-3">📚</p>
               <p className="text-sm">אין מודעות להצגה כרגע</p>
