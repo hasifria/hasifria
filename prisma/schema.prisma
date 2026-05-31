@@ -25,12 +25,13 @@ model Book {
 }
 
 model User {
-  id         String    @id @default(cuid())
-  name       String?
-  phone      String    @unique
-  address    String?
-  city       String?
-  created_at DateTime  @default(now())
+  id               String    @id @default(cuid())
+  name             String?
+  phone            String    @unique
+  address          String?
+  city             String?
+  created_at       DateTime  @default(now())
+  terms_accepted_at DateTime?
 
   listings   Listing[]
   likes      Like[]

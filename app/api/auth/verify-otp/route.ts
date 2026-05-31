@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { sendNewUserEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -22,18 +23,29 @@ export async function POST(req: Request) {
 
     const isRegistration = !!(session.pendingName);
     const phone = session.pendingPhone;
+    const now = new Date();
 
     const user = await prisma.user.upsert({
       where: { phone },
       update: isRegistration
-        ? { name: session.pendingName, address: session.pendingAddress }
+        ? { name: session.pendingName, address: session.pendingAddress, terms_accepted_at: now }
         : {},
       create: {
         phone,
         name: session.pendingName ?? null,
         address: session.pendingAddress ?? null,
+        terms_accepted_at: isRegistration ? now : null,
       },
     });
+
+    if (isRegistration) {
+      sendNewUserEmail({
+        name: user.name,
+        phone: user.phone,
+        city: user.city,
+        address: user.address,
+      }).catch(() => {});
+    }
 
     session.userId = user.id;
     session.pendingPhone = undefined;

@@ -1,27 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import LikeButton from "@/components/LikeButton";
 import BooksLoadingSpinner from "@/components/BooksLoadingSpinner";
+import Footer from "@/components/Footer";
 
-const CITIES = ["כל הארץ", "תל אביב", "ירושלים", "חיפה", "באר שבע", "ראשון לציון", "נס ציונה", "פתח תקווה", "אשדוד", "נתניה", "רחובות", "חולון", "בת ים", "בני ברק"];
+const ISRAELI_CITIES = [
+  "אבו גוש","אבן יהודה","אופקים","אור יהודה","אור עקיבא","אורנית","אילת","אכסאל","אלעד",
+  "אלפי מנשה","אנו","אפרת","אריאל","אשדוד","אשקלון","באר יעקב","באר שבע","בית אל",
+  "בית גן","בית דגן","בית שאן","בית שמש","בני ברק","בת ים","ג'לג'וליה","גבעת שמואל",
+  "גבעתיים","גדרה","גן יבנה","דאלית אל-כרמל","דימונה","הוד השרון","הרצליה","חדרה",
+  "חולון","חיפה","טבריה","טייבה","טירה","טירת כרמל","יבנה","יהוד-מונוסון","יקנעם",
+  "ירושלים","כוכב יאיר","כפר סבא","כפר קאסם","כרמיאל","לוד","מגדל העמק","מודיעין",
+  "מודיעין עילית","מזכרת בתיה","מעלה אדומים","מעלות-תרשיחא","נהריה","נס ציונה",
+  "נצרת","נצרת עילית","נשר","נתיבות","נתניה","עכו","עפולה","ערד","פתח תקווה",
+  "צפת","קדימה-צורן","קלנסווה","קריית אונו","קריית אתא","קריית ביאליק","קריית גת",
+  "קריית מלאכי","קריית מוצקין","קריית שמונה","קריית ים","ראש העין","ראשון לציון",
+  "רהט","רחובות","רמה","רמלה","רמת גן","רמת השרון","רעננה","שדרות","תל אביב",
+];
 
 const CITY_COORDS: Record<string, { lat: number; lon: number }> = {
-  "תל אביב": { lat: 32.0853, lon: 34.7818 },
-  "ירושלים": { lat: 31.7683, lon: 35.2137 },
-  "חיפה": { lat: 32.7940, lon: 34.9896 },
-  "באר שבע": { lat: 31.2516, lon: 34.7915 },
-  "ראשון לציון": { lat: 31.9730, lon: 34.7925 },
-  "נס ציונה": { lat: 31.9296, lon: 34.7996 },
-  "פתח תקווה": { lat: 32.0872, lon: 34.8867 },
-  "אשדוד": { lat: 31.8044, lon: 34.6552 },
-  "נתניה": { lat: 32.3328, lon: 34.8603 },
-  "רחובות": { lat: 31.8928, lon: 34.8113 },
-  "חולון": { lat: 32.0167, lon: 34.7667 },
-  "בת ים": { lat: 32.0167, lon: 34.7500 },
-  "בני ברק": { lat: 32.0887, lon: 34.8338 },
+  "תל אביב":      { lat: 32.0853, lon: 34.7818 },
+  "ירושלים":      { lat: 31.7683, lon: 35.2137 },
+  "חיפה":         { lat: 32.7940, lon: 34.9896 },
+  "באר שבע":      { lat: 31.2516, lon: 34.7915 },
+  "ראשון לציון":  { lat: 31.9730, lon: 34.7925 },
+  "נס ציונה":     { lat: 31.9296, lon: 34.7996 },
+  "פתח תקווה":    { lat: 32.0872, lon: 34.8867 },
+  "אשדוד":        { lat: 31.8044, lon: 34.6552 },
+  "נתניה":        { lat: 32.3328, lon: 34.8603 },
+  "רחובות":       { lat: 31.8928, lon: 34.8113 },
+  "חולון":        { lat: 32.0167, lon: 34.7667 },
+  "בת ים":        { lat: 32.0167, lon: 34.7500 },
+  "בני ברק":      { lat: 32.0887, lon: 34.8338 },
 };
 
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -52,12 +65,30 @@ type RecentListing = {
   location: string | null;
 };
 
+type Pos = { top: number; left: number; width: number };
+
 export default function HomeClient() {
   const [query, setQuery] = useState("");
-  const [city, setCity] = useState("כל הארץ");
+  const [city, setCity] = useState("");
+  const [cityInput, setCityInput] = useState("");
+  const [cityOpen, setCityOpen] = useState(false);
+  const [pos, setPos] = useState<Pos>({ top: 0, left: 0, width: 0 });
+  const [dbCities, setDbCities] = useState<string[]>([]);
   const [recent, setRecent] = useState<RecentListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [geoCity, setGeoCity] = useState<string | null>(null);
+  const cityRef = useRef<HTMLDivElement>(null);
+
+  const allCities = [...new Set([...ISRAELI_CITIES, ...dbCities])].sort((a, b) =>
+    a.localeCompare(b, "he")
+  );
+
+  useEffect(() => {
+    fetch("/api/cities")
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setDbCities(data); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -73,6 +104,7 @@ export default function HomeClient() {
           if (minDist < 30 && nearest) {
             setGeoCity(nearest);
             setCity(nearest);
+            setCityInput(nearest);
           }
         },
         () => {},
@@ -82,8 +114,20 @@ export default function HomeClient() {
   }, []);
 
   useEffect(() => {
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (cityRef.current && !cityRef.current.contains(e.target as Node)) setCityOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
+  }, []);
+
+  useEffect(() => {
     setIsLoading(true);
-    const cityParam = city !== "כל הארץ" ? `?city=${encodeURIComponent(city)}` : "";
+    const cityParam = city ? `?city=${encodeURIComponent(city)}` : "";
     fetch(`/api/listings/recent${cityParam}`)
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setRecent(data); })
@@ -91,11 +135,33 @@ export default function HomeClient() {
       .finally(() => setIsLoading(false));
   }, [city]);
 
+  const measurePos = useCallback(() => {
+    if (cityRef.current) {
+      const rect = cityRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+  }, []);
+
+  const openCityDropdown = useCallback(() => {
+    measurePos();
+    setCityOpen(true);
+  }, [measurePos]);
+
+  const selectCity = (c: string) => {
+    setCity(c);
+    setCityInput(c);
+    setCityOpen(false);
+  };
+
+  const filteredCities = cityInput.trim()
+    ? allCities.filter((c) => c.includes(cityInput.trim()))
+    : allCities;
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (query.trim()) params.set("q", query.trim());
-    if (city !== "כל הארץ") params.set("city", city);
+    if (city && city !== "כל הארץ") params.set("city", city);
     window.location.href = `/search?${params.toString()}`;
   };
 
@@ -107,10 +173,10 @@ export default function HomeClient() {
         <section className="py-16 px-4 border-b border-[#1a1a1a]">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-[#F0F0F0] mb-4 leading-tight">
-              מצא את הספר הבא שלך
+              ספרים יד שניה או למסירה קרוב לבית
             </h1>
             <p className="text-lg text-[#888] mb-10">
-              ספרים יד שנייה ממוכרים פרטיים בכל רחבי ישראל
+              ממוכרים פרטיים בכל רחבי ישראל
             </p>
 
             <form onSubmit={handleSearch} className="bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-2 flex flex-col md:flex-row gap-2">
@@ -127,21 +193,51 @@ export default function HomeClient() {
                 />
               </div>
               <div className="w-px bg-[#2a2a2a] hidden md:block" />
-              <div className="flex items-center gap-2 px-3 md:min-w-40">
+
+              {/* City free-text input with autocomplete */}
+              <div ref={cityRef} className="relative flex items-center gap-2 px-3 md:min-w-44">
                 <svg className="w-5 h-5 text-[#555] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full py-3 outline-none text-[#F0F0F0] bg-transparent cursor-pointer"
-                >
-                  {CITIES.map((c) => (
-                    <option key={c} value={c} className="bg-[#1e1e1e] text-[#F0F0F0]">{c}</option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  value={cityInput}
+                  onChange={(e) => { setCityInput(e.target.value); setCity(e.target.value); openCityDropdown(); }}
+                  onFocus={openCityDropdown}
+                  onClick={openCityDropdown}
+                  placeholder="כל הארץ"
+                  autoComplete="off"
+                  className="w-full py-3 outline-none text-[#F0F0F0] placeholder:text-[#555] bg-transparent"
+                />
+                {cityInput && (
+                  <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); setCity(""); setCityInput(""); }}
+                    className="text-[#555] hover:text-[#888] shrink-0 text-sm"
+                  >✕</button>
+                )}
+                {cityOpen && filteredCities.length > 0 && (
+                  <div
+                    style={{ position: "fixed", top: pos.top, left: pos.left, width: Math.max(pos.width, 200), zIndex: 9999 }}
+                    className="max-h-60 overflow-y-auto bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl shadow-2xl"
+                  >
+                    {!cityInput.trim() && (
+                      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => selectCity("")}
+                        className="w-full text-right px-4 text-sm text-[#888] hover:bg-[#2a2a2a] border-b border-[#2a2a2a] flex items-center min-h-[44px]">
+                        כל הארץ
+                      </button>
+                    )}
+                    {filteredCities.slice(0, 50).map((c) => (
+                      <button key={c} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => selectCity(c)}
+                        className="w-full text-right px-4 text-sm text-[#F0F0F0] hover:bg-[#2a2a2a] flex items-center min-h-[44px]">
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
+
               <button type="submit" className="bg-[#F5A623] hover:bg-[#e0941a] active:bg-[#c07f14] transition-colors text-black font-semibold px-8 py-3 rounded-xl">
                 חפש
               </button>
@@ -163,7 +259,7 @@ export default function HomeClient() {
         <section className="max-w-6xl mx-auto px-4 py-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-[#F0F0F0]">
-              {city !== "כל הארץ" ? `ספרים ב${city}` : "מודעות אחרונות"}
+              {city ? `ספרים ב${city}` : "מודעות אחרונות"}
             </h2>
             <Link href="/search?q=" className="text-sm text-[#F5A623] hover:text-[#e0941a] font-medium">
               כל הספרים ←
@@ -246,9 +342,7 @@ export default function HomeClient() {
         </section>
       </main>
 
-      <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-8 px-4 text-center text-sm">
-        <p>© 2026 הספרייה — קנה ומכור ספרים יד שנייה בישראל</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

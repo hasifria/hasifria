@@ -2,29 +2,48 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
+const ISRAELI_CITIES = [
+  "אבו גוש","אבן יהודה","אופקים","אור יהודה","אור עקיבא","אורנית","אילת","אכסאל","אלעד",
+  "אלפי מנשה","אנו","אפרת","אריאל","אשדוד","אשקלון","באר יעקב","באר שבע","בית אל",
+  "בית גן","בית דגן","בית שאן","בית שמש","בני ברק","בת ים","ג'לג'וליה","גבעת שמואל",
+  "גבעתיים","גדרה","גן יבנה","דאלית אל-כרמל","דימונה","הוד השרון","הרצליה","חדרה",
+  "חולון","חיפה","טבריה","טייבה","טירה","טירת כרמל","יבנה","יהוד-מונוסון","יקנעם",
+  "ירושלים","כוכב יאיר","כפר סבא","כפר קאסם","כרמיאל","לוד","מגדל העמק","מודיעין",
+  "מודיעין עילית","מזכרת בתיה","מעלה אדומים","מעלות-תרשיחא","נהריה","נס ציונה",
+  "נצרת","נצרת עילית","נשר","נתיבות","נתניה","עכו","עפולה","ערד","פתח תקווה",
+  "צפת","קדימה-צורן","קלנסווה","קריית אונו","קריית אתא","קריית ביאליק","קריית גת",
+  "קריית מלאכי","קריית מוצקין","קריית שמונה","קריית ים","ראש העין","ראשון לציון",
+  "רהט","רחובות","רמה","רמלה","רמת גן","רמת השרון","רעננה","שדרות","תל אביב",
+];
+
 type Pos = { top: number; left: number; width: number };
 
 export default function CityAutocomplete({
   defaultValue = "",
   name = "city",
+  onValueChange,
 }: {
   defaultValue?: string;
   name?: string;
+  onValueChange?: (city: string) => void;
 }) {
-  const [cities, setCities] = useState<string[]>([]);
+  const [dbCities, setDbCities] = useState<string[]>([]);
   const [value, setValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<Pos>({ top: 0, left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const allCities = [...new Set([...ISRAELI_CITIES, ...dbCities])].sort((a, b) =>
+    a.localeCompare(b, "he")
+  );
+
   useEffect(() => {
     fetch("/api/cities")
       .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setCities(data); })
+      .then((data) => { if (Array.isArray(data)) setDbCities(data); })
       .catch(() => {});
   }, []);
 
-  // Close on outside mousedown or touchstart
   useEffect(() => {
     const handler = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node;
@@ -40,7 +59,6 @@ export default function CityAutocomplete({
     };
   }, []);
 
-  // Calculate fixed position from the container's viewport rect
   const measurePos = useCallback(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -56,21 +74,22 @@ export default function CityAutocomplete({
   const selectCity = useCallback((city: string) => {
     setValue(city);
     setOpen(false);
-  }, []);
+    onValueChange?.(city);
+  }, [onValueChange]);
 
   const clearCity = useCallback(() => {
     setValue("");
+    onValueChange?.("");
     measurePos();
     setTimeout(() => setOpen(true), 0);
-  }, [measurePos]);
+  }, [measurePos, onValueChange]);
 
   const filtered = value.trim().length > 0
-    ? cities.filter((c) => c.includes(value.trim()))
-    : cities;
+    ? allCities.filter((c) => c.includes(value.trim()))
+    : allCities;
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Hidden input carries value for form submission */}
       <input type="hidden" name={name} value={value} />
 
       <div className="flex items-center gap-2 bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl px-3 focus-within:border-[#F5A623] transition min-w-[140px]">
@@ -81,7 +100,7 @@ export default function CityAutocomplete({
         <input
           type="text"
           value={value}
-          onChange={(e) => { setValue(e.target.value); openDropdown(); }}
+          onChange={(e) => { setValue(e.target.value); onValueChange?.(e.target.value); openDropdown(); }}
           onFocus={openDropdown}
           onClick={openDropdown}
           placeholder="כל הארץ"
@@ -100,7 +119,6 @@ export default function CityAutocomplete({
         )}
       </div>
 
-      {/* Dropdown rendered with fixed positioning to escape stacking contexts */}
       {open && filtered.length > 0 && (
         <div
           style={{ position: "fixed", top: pos.top, left: pos.left, width: pos.width, zIndex: 9999 }}
@@ -117,7 +135,7 @@ export default function CityAutocomplete({
               כל הארץ
             </button>
           )}
-          {filtered.map((city) => (
+          {filtered.slice(0, 50).map((city) => (
             <button
               key={city}
               type="button"

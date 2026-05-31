@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { prisma } from "@/lib/db";
 import CityAutocomplete from "@/components/CityAutocomplete";
+import Footer from "@/components/Footer";
 
 type Props = { searchParams: Promise<{ q?: string; city?: string }> };
 
@@ -232,9 +233,7 @@ export default async function SearchPage({ searchParams }: Props) {
         </div>
       </main>
 
-      <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-8 px-4 text-center text-sm">
-        <p>© 2026 הספרייה — קנה ומכור ספרים יד שנייה בישראל</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

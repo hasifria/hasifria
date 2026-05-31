@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import Link from "next/link";
 import { Header } from "@/components/Header";
 
 const FAQ_ITEMS = [
@@ -19,8 +20,8 @@ const FAQ_ITEMS = [
     a: "אנחנו ממליצים לבדוק את הספר לפני התשלום. האחריות על העסקה היא בין הקונה למוכר.",
   },
   {
-    q: "האם המספר שלי מוצג לציבור?",
-    a: "לא. מספר הטלפון שלך לא מוצג ברשימות. רק כאשר קונה לוחץ על כפתור הוואטסאפ נוצר קשר ישיר.",
+    q: "האם המספר שלי חשוף?",
+    a: "כן, מספר הטלפון שלך מופיע בכפתור הוואטסאפ בדף הספר ובכתובת ה-URL של החנות שלך. זה מאפשר לקונים ליצור איתך קשר ישירות. אם אינך מעוניין בכך, תוכל להימנע מפרסום ספרים.",
   },
 ];
 
@@ -121,10 +122,10 @@ function RegisterForm() {
               {/* ToS + Privacy */}
               <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-4 space-y-3">
                 <p className="text-xs text-[#888] leading-relaxed">
-                  בהרשמה אתה מסכים ל
-                  <button type="button" className="text-[#F5A623] hover:underline mx-1">תנאי השימוש</button>
+                  בלחיצה על הרשמה אני מסכים ל
+                  <Link href="/terms" target="_blank" className="text-[#F5A623] hover:underline mx-1">תנאי השימוש</Link>
                   ול
-                  <button type="button" className="text-[#F5A623] hover:underline mx-1">מדיניות הפרטיות</button>
+                  <Link href="/privacy" target="_blank" className="text-[#F5A623] hover:underline mx-1">מדיניות הפרטיות</Link>
                   של הספרייה. המידע שלך לא יועבר לצד שלישי ללא הסכמתך.
                 </p>
                 <label className="flex items-center gap-3 cursor-pointer">

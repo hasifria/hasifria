@@ -4,6 +4,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/Header";
 import LikeButton from "@/components/LikeButton";
+import DesktopSearchBar from "@/components/DesktopSearchBar";
+import Footer from "@/components/Footer";
 import { getSeoTemplates, fillTemplate } from "@/lib/seo";
 
 const conditionMap = {
@@ -63,6 +65,7 @@ export default async function AuthorPage({ params }: Props) {
   return (
     <div className="flex flex-col min-h-screen bg-[#0f0f0f]">
       <Header />
+      <DesktopSearchBar />
       <main className="flex-1">
         {/* Author header */}
         <div className="bg-[#141414] border-b border-[#2a2a2a]">
@@ -173,9 +176,7 @@ export default async function AuthorPage({ params }: Props) {
         </div>
       </main>
 
-      <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-8 px-4 text-center text-sm">
-        <p>© 2026 הספרייה — קנה ומכור ספרים יד שנייה בישראל</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
