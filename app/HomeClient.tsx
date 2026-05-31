@@ -174,7 +174,7 @@ export default function HomeClient() {
         <section className="py-16 px-4 border-b border-[#1a1a1a]">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-[#F0F0F0] mb-4 leading-tight">
-              ספרים יד שניה או למסירה קרוב לבית
+              ספרים יד שניה או למסירה קרוב לביתך
             </h1>
             <p className="text-lg text-[#888] mb-10">
               ממוכרים פרטיים בכל רחבי ישראל
