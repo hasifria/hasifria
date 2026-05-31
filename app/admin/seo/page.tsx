@@ -106,7 +106,7 @@ export default function AdminSeoPage() {
   const saveFooterCol = async (col: FooterCol) => {
     setFooterSaving(col.page_type);
     setFooterSaved(null);
-    const validLinks = col.links.filter((l) => l.name.trim() || l.url.trim());
+    const validLinks = col.links.filter((l) => l.name.trim());
     try {
       await fetch("/api/admin/seo", {
         method: "POST",

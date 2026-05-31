@@ -19,11 +19,14 @@ export default function Footer() {
   const parsedCols = cols
     .sort((a, b) => a.page_type.localeCompare(b.page_type))
     .map((col) => {
-      let links: FooterLink[] = [];
-      try { links = JSON.parse(col.description_template); } catch { /* empty */ }
-      return { title: col.title_template, links: Array.isArray(links) ? links.slice(0, 5) : [] };
+      let raw: FooterLink[] = [];
+      try { raw = JSON.parse(col.description_template); } catch { /* empty */ }
+      const links = (Array.isArray(raw) ? raw : [])
+        .filter((l) => l.name && l.name.trim())
+        .slice(0, 5);
+      return { title: col.title_template, links };
     })
-    .filter((col) => col.title || col.links.length > 0);
+    .filter((col) => col.links.length > 0);
 
   return (
     <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-10 px-4">

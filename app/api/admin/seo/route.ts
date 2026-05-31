@@ -16,7 +16,8 @@ export async function GET() {
 export async function POST(req: Request) {
   if (!await requireSuperUser()) return Response.json({ error: "Forbidden" }, { status: 403 });
   const { page_type, title_template, description_template, og_image } = await req.json();
-  if (!page_type || !title_template || !description_template) {
+  const isFooterCol = typeof page_type === "string" && page_type.startsWith("footer_col_");
+  if (!page_type || (!isFooterCol && !title_template) || description_template === undefined || description_template === null) {
     return Response.json({ error: "Missing fields" }, { status: 400 });
   }
   const setting = await prisma.seoSetting.upsert({
