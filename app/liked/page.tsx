@@ -94,7 +94,7 @@ export default async function LikedPage() {
                     aria-label={item.title}
                   />
                   <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] hover:border-[#F5A623]/40 transition-all overflow-hidden">
-                    <div className="bg-[#2a2a2a] aspect-[2/3] flex items-center justify-center overflow-hidden">
+                    <div className="bg-[#2a2a2a] aspect-[2/3] flex items-center justify-center overflow-hidden pointer-events-none">
                       {item.cover_image ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img

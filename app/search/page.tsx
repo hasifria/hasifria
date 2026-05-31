@@ -192,7 +192,7 @@ export default async function SearchPage({ searchParams }: Props) {
                         aria-label={book.title}
                       />
 
-                      <div className="aspect-[2/3] bg-[#2a2a2a] flex items-center justify-center overflow-hidden">
+                      <div className="aspect-[2/3] bg-[#2a2a2a] flex items-center justify-center overflow-hidden pointer-events-none">
                         {book.cover_image ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
