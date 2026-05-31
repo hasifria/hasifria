@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
@@ -7,6 +8,10 @@ import { Header } from "@/components/Header";
 import Dashboard from "./Dashboard";
 
 type Props = { params: Promise<{ phone: string }> };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: "החנות שלי בספריה - ספרים יד שניה" };
+}
 
 export default async function SellerPage({ params }: Props) {
   const { phone } = await params;

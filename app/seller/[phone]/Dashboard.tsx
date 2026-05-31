@@ -398,7 +398,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
             </div>
             <div className="md:flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-[#F0F0F0] md:truncate">
-                {seller.name ?? seller.phone}
+                {isOwner ? "החנות שלי בספריה" : (seller.name ?? seller.phone)}
               </h1>
               {(seller.address ?? seller.city) && (
                 <p className="flex items-center justify-center gap-1 mt-2 text-lg text-[#F0F0F0] md:text-sm md:text-[#888] md:mt-1 md:justify-start">
