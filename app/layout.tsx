@@ -9,8 +9,8 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "הספריה - ספרים יד שנייה",
-  description: "קנה ומכור ספרים יד שנייה בישראל. מצא ספרים במחירים נוחים ממוכרים פרטיים בכל רחבי הארץ.",
+  title: "הספריה - ספרים יד שניה",
+  description: "קנה ומכור ספרים יד שניה בישראל. מצא ספרים במחירים נוחים ממוכרים פרטיים בכל רחבי הארץ.",
 };
 
 export default function RootLayout({

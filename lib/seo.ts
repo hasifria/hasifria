@@ -2,20 +2,20 @@
 
 export const SEO_DEFAULTS = {
   home: {
-    title_template: "הספריה — ספרים יד שנייה בישראל",
-    description_template: "מצא ספרים יד שנייה ממוכרים פרטיים בכל רחבי ישראל. מחירים נוחים, מגוון עצום.",
+    title_template: "הספריה — ספרים יד שניה בישראל",
+    description_template: "מצא ספרים יד שניה ממוכרים פרטיים בכל רחבי ישראל. מחירים נוחים, מגוון עצום.",
   },
   book: {
     title_template: "{title} מאת {author} — הספריה",
-    description_template: "קנה את הספר {title} מאת {author} יד שנייה. מחיר החל מ-{price}₪ באזור {city}.",
+    description_template: "קנה את הספר {title} מאת {author} יד שניה. מחיר החל מ-{price}₪ באזור {city}.",
   },
   author: {
     title_template: "ספרים מאת {author} — הספריה",
-    description_template: "כל הספרים של {author} למכירה יד שנייה בישראל.",
+    description_template: "כל הספרים של {author} למכירה יד שניה בישראל.",
   },
   image_defaults: {
     title_template: "",
-    description_template: "{title} מאת {author} — ספר יד שנייה בישראל",
+    description_template: "{title} מאת {author} — ספר יד שניה בישראל",
   },
 } as const;
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Header } from "@/components/Header";
@@ -8,6 +8,7 @@ import LikeButton from "@/components/LikeButton";
 import DesktopSearchBar from "@/components/DesktopSearchBar";
 import Footer from "@/components/Footer";
 import { getSeoTemplates, fillTemplate } from "@/lib/seo";
+import { isBookId, titleToSlug, slugToTitle } from "@/lib/slug";
 
 const conditionMap = {
   new:  { label: "כמו חדש",  color: "bg-emerald-900/40 text-emerald-400 border-emerald-800" },
@@ -21,24 +22,53 @@ function whatsappLink(phone: string, bookTitle: string) {
   return `https://wa.me/${normalized}?text=${text}`;
 }
 
+async function getBookBySlugOrId(param: string) {
+  if (isBookId(param)) {
+    return prisma.book.findUnique({ where: { id: param }, select: { id: true, title: true } });
+  }
+  const title = slugToTitle(decodeURIComponent(param));
+  return prisma.book.findFirst({ where: { title }, select: { id: true, title: true } });
+}
+
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  const book = await prisma.book.findUnique({
-    where: { id },
-    select: {
-      title: true,
-      author: true,
-      cover_image: true,
-      listings: {
-        where: { status: "available" },
-        select: { price: true, seller: { select: { city: true, address: true } } },
-        orderBy: { price: "asc" },
-        take: 1,
+  const { id: param } = await params;
+
+  let book;
+  if (isBookId(param)) {
+    book = await prisma.book.findUnique({
+      where: { id: param },
+      select: {
+        title: true,
+        author: true,
+        cover_image: true,
+        listings: {
+          where: { status: "available" },
+          select: { price: true, seller: { select: { city: true, address: true } } },
+          orderBy: { price: "asc" },
+          take: 1,
+        },
       },
-    },
-  });
+    });
+  } else {
+    const title = slugToTitle(decodeURIComponent(param));
+    book = await prisma.book.findFirst({
+      where: { title },
+      select: {
+        title: true,
+        author: true,
+        cover_image: true,
+        listings: {
+          where: { status: "available" },
+          select: { price: true, seller: { select: { city: true, address: true } } },
+          orderBy: { price: "asc" },
+          take: 1,
+        },
+      },
+    });
+  }
+
   if (!book) return { title: "ספר לא נמצא — הספריה" };
 
   const seo = await getSeoTemplates("book");
@@ -52,6 +82,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = fillTemplate(seo.title_template, { title: book.title, author: book.author });
   const description = fillTemplate(seo.description_template, { title: book.title, author: book.author, price, city });
+  const slug = titleToSlug(book.title);
 
   return {
     title,
@@ -60,16 +91,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       images: [seo.og_image || book.cover_image || "/hasifria_logo.jpg"],
-      url: `https://hasifria-roan.vercel.app/books/${id}`,
+      url: `https://hasifria-roan.vercel.app/books/${encodeURIComponent(slug)}`,
     },
   };
 }
 
 export default async function BookPage({ params }: Props) {
-  const { id } = await params;
+  const { id: param } = await params;
 
-  const book = await prisma.book.findUnique({
-    where: { id },
+  // If param looks like a DB cuid, redirect to the slug URL
+  if (isBookId(param)) {
+    const found = await prisma.book.findUnique({ where: { id: param }, select: { title: true } });
+    if (!found) notFound();
+    redirect(`/books/${encodeURIComponent(titleToSlug(found.title))}`);
+  }
+
+  const title = slugToTitle(decodeURIComponent(param));
+
+  const book = await prisma.book.findFirst({
+    where: { title },
     include: {
       listings: {
         where: { status: "available" },
@@ -108,7 +148,7 @@ export default async function BookPage({ params }: Props) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={book.cover_image}
-                  alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שנייה`}
+                  alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שניה`}
                   className="w-40 h-56 object-cover rounded-xl shadow-lg"
                 />
               ) : (

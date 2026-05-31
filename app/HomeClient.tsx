@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import LikeButton from "@/components/LikeButton";
 import BooksLoadingSpinner from "@/components/BooksLoadingSpinner";
 import Footer from "@/components/Footer";
+import { titleToSlug } from "@/lib/slug";
 
 const ISRAELI_CITIES = [
   "אבו גוש","אבן יהודה","אופקים","אור יהודה","אור עקיבא","אורנית","אילת","אכסאל","אלעד",
@@ -278,13 +279,13 @@ export default function HomeClient() {
               {recent.map((item) => (
                 <div key={item.listingId} className="relative group">
                   <Link
-                    href={`/books/${item.bookId}`}
+                    href={`/books/${encodeURIComponent(titleToSlug(item.title))}`}
                     className="block bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] hover:border-[#F5A623]/40 transition-all overflow-hidden"
                   >
                     <div className="bg-[#2a2a2a] aspect-[2/3] flex items-center justify-center overflow-hidden">
                       {item.cover_image ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.cover_image} alt={item.cover_alt || `${item.title} מאת ${item.author} — ספר יד שנייה`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src={item.cover_image} alt={item.cover_alt || `${item.title} מאת ${item.author} — ספר יד שניה`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <span className="text-5xl opacity-20">📕</span>
                       )}

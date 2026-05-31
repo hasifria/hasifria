@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { prisma } from "@/lib/db";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import Footer from "@/components/Footer";
+import { titleToSlug } from "@/lib/slug";
 
 type Props = { searchParams: Promise<{ q?: string; city?: string }> };
 
@@ -186,7 +187,7 @@ export default async function SearchPage({ searchParams }: Props) {
                     >
                       {/* Full-card link (sits behind everything) */}
                       <Link
-                        href={`/books/${book.id}`}
+                        href={`/books/${encodeURIComponent(titleToSlug(book.title))}`}
                         className="absolute inset-0 z-0 rounded-2xl"
                         aria-label={book.title}
                       />
@@ -196,7 +197,7 @@ export default async function SearchPage({ searchParams }: Props) {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={book.cover_image}
-                            alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שנייה`}
+                            alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שניה`}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (

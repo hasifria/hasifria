@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ShareButton from "@/components/ShareButton";
+import { titleToSlug } from "@/lib/slug";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -232,7 +233,7 @@ function ListingCard({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={listing.book.cover_image}
-              alt={listing.book.cover_alt || `${listing.book.title} מאת ${listing.book.author} — ספר יד שנייה`}
+              alt={listing.book.cover_alt || `${listing.book.title} מאת ${listing.book.author} — ספר יד שניה`}
               className="w-16 h-24 object-cover rounded-lg shadow-sm"
             />
           ) : (
@@ -245,7 +246,7 @@ function ListingCard({
         {/* Info */}
         <div className="flex-1 min-w-0">
           <Link
-            href={`/books/${listing.book_id}`}
+            href={`/books/${encodeURIComponent(titleToSlug(listing.book.title))}`}
             className="font-semibold text-[#F0F0F0] hover:text-[#F5A623] transition-colors line-clamp-2 leading-snug block"
           >
             {listing.book.title}

@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import LikeButton from "@/components/LikeButton";
+import { titleToSlug } from "@/lib/slug";
 
 const conditionLabel: Record<string, { label: string; color: string }> = {
   new:  { label: "כמו חדש", color: "bg-emerald-900/40 text-emerald-400" },
@@ -88,7 +89,7 @@ export default async function LikedPage() {
                 // Absolute-positioned card link avoids nested <a> tags
                 <div key={item.listingId} className="relative group">
                   <Link
-                    href={`/books/${item.bookId}`}
+                    href={`/books/${encodeURIComponent(titleToSlug(item.title))}`}
                     className="absolute inset-0 z-0 rounded-xl"
                     aria-label={item.title}
                   />
@@ -98,7 +99,7 @@ export default async function LikedPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={item.cover_image}
-                          alt={item.cover_alt || `${item.title} מאת ${item.author} — ספר יד שנייה`}
+                          alt={item.cover_alt || `${item.title} מאת ${item.author} — ספר יד שניה`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
@@ -142,7 +143,7 @@ export default async function LikedPage() {
       </main>
 
       <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-8 px-4 text-center text-sm">
-        <p>© 2026 הספריה — קנה ומכור ספרים יד שנייה בישראל</p>
+        <p>© 2026 הספריה — קנה ומכור ספרים יד שניה בישראל</p>
       </footer>
     </div>
   );

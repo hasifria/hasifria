@@ -174,12 +174,12 @@ export default function AdminBooksPage() {
                         type="text"
                         value={editValues.cover_alt}
                         onChange={(e) => set("cover_alt", e.target.value)}
-                        placeholder={`${editValues.title || book.title} מאת ${editValues.author || book.author} — ספר יד שנייה`}
+                        placeholder={`${editValues.title || book.title} מאת ${editValues.author || book.author} — ספר יד שניה`}
                         className="w-full px-3 py-2 rounded-lg border border-[#2a2a2a] bg-[#2a2a2a] text-[#F0F0F0] outline-none focus:border-[#F5A623] transition text-sm"
                         dir="rtl"
                       />
                       <p className="text-xs text-[#555] mt-1">
-                        ריק = יווצר אוטומטית: &ldquo;{editValues.title || book.title} מאת {editValues.author || book.author} — ספר יד שנייה&rdquo;
+                        ריק = יווצר אוטומטית: &ldquo;{editValues.title || book.title} מאת {editValues.author || book.author} — ספר יד שניה&rdquo;
                       </p>
                     </div>
                   </div>

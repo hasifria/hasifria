@@ -568,7 +568,7 @@ function MobileSell() {
           </div>
         </main>
         <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-8 px-4 text-center text-sm">
-          <p>© 2026 הספריה — קנה ומכור ספרים יד שנייה בישראל</p>
+          <p>© 2026 הספריה — קנה ומכור ספרים יד שניה בישראל</p>
         </footer>
       </div>
     </>
@@ -817,7 +817,7 @@ function DesktopSell() {
           </div>
         </main>
         <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-8 px-4 text-center text-sm">
-          <p>© 2026 הספריה — קנה ומכור ספרים יד שנייה בישראל</p>
+          <p>© 2026 הספריה — קנה ומכור ספרים יד שניה בישראל</p>
         </footer>
       </div>
     </>

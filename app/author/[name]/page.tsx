@@ -7,6 +7,7 @@ import LikeButton from "@/components/LikeButton";
 import DesktopSearchBar from "@/components/DesktopSearchBar";
 import Footer from "@/components/Footer";
 import { getSeoTemplates, fillTemplate } from "@/lib/seo";
+import { titleToSlug } from "@/lib/slug";
 
 const conditionMap = {
   new:  { label: "כמו חדש",  color: "bg-emerald-900/40 text-emerald-400" },
@@ -113,14 +114,14 @@ export default async function AuthorPage({ params }: Props) {
                     <div className="w-12 h-16 rounded-lg overflow-hidden shrink-0 bg-[#2a2a2a] flex items-center justify-center border border-[#3a3a3a]">
                       {book.cover_image ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={book.cover_image} alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שנייה`} className="w-full h-full object-cover" />
+                        <img src={book.cover_image} alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שניה`} className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-xl opacity-40">📕</span>
                       )}
                     </div>
                     <div>
                       <Link
-                        href={`/books/${book.id}`}
+                        href={`/books/${encodeURIComponent(titleToSlug(book.title))}`}
                         className="text-lg font-bold text-[#F0F0F0] hover:text-[#F5A623] transition-colors"
                       >
                         {book.title}
