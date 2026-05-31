@@ -76,9 +76,13 @@ export default function HomeClient() {
   const [pos, setPos] = useState<Pos>({ top: 0, left: 0, width: 0 });
   const [dbCities, setDbCities] = useState<string[]>([]);
   const [recent, setRecent] = useState<RecentListing[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [geoCity, setGeoCity] = useState<string | null>(null);
   const cityRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const allCities = [...new Set([...ISRAELI_CITIES, ...dbCities])].sort((a, b) =>
     a.localeCompare(b, "he")
@@ -128,13 +132,48 @@ export default function HomeClient() {
 
   useEffect(() => {
     setIsLoading(true);
-    const cityParam = city ? `?city=${encodeURIComponent(city)}` : "";
-    fetch(`/api/listings/recent${cityParam}`)
+    setRecent([]);
+    setPage(1);
+    setHasMore(true);
+    const params = new URLSearchParams({ page: "1", limit: "12" });
+    if (city && city !== "כל הארץ") params.set("city", city);
+    fetch(`/api/listings/recent?${params}`)
       .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setRecent(data); })
+      .then((data) => {
+        setRecent(data.listings ?? []);
+        setHasMore(data.hasMore ?? false);
+      })
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, [city]);
+
+  const loadMore = useCallback(() => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    const nextPage = page + 1;
+    const params = new URLSearchParams({ page: String(nextPage), limit: "12" });
+    if (city && city !== "כל הארץ") params.set("city", city);
+    fetch(`/api/listings/recent?${params}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setRecent((prev) => [...prev, ...(data.listings ?? [])]);
+        setHasMore(data.hasMore ?? false);
+        setPage(nextPage);
+      })
+      .catch(() => {})
+      .finally(() => setIsLoadingMore(false));
+  }, [isLoadingMore, hasMore, page, city]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { rootMargin: "300px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   const measurePos = useCallback(() => {
     if (cityRef.current) {
@@ -316,6 +355,19 @@ export default function HomeClient() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Infinite scroll sentinel */}
+          {!isLoading && (
+            <div ref={sentinelRef} className="flex justify-center py-6">
+              {isLoadingMore && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src="/logo-icon.png" alt="" width={32} height={32} className="animate-pulse opacity-60" />
+              )}
+              {!isLoadingMore && !hasMore && recent.length > 0 && (
+                <p className="text-[#555] text-sm">אין עוד ספרים להצגה</p>
+              )}
             </div>
           )}
         </section>

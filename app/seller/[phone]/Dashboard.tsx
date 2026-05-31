@@ -223,39 +223,44 @@ function ListingCard({
   onDeleteClick: () => void;
 }) {
   const isSold = listing.status === "sold";
+  const bookUrl = `/books/${encodeURIComponent(titleToSlug(listing.book.title))}`;
 
   return (
-    <div className={`bg-[#1e1e1e] rounded-2xl border overflow-hidden transition-all ${isSold ? "border-[#2a2a2a] opacity-50" : "border-[#2a2a2a]"}`}>
-      <div className="flex gap-4 p-4">
-        {/* Cover */}
-        <div className="shrink-0">
-          <Link href={`/books/${encodeURIComponent(titleToSlug(listing.book.title))}`}>
-            {listing.book.cover_image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={listing.book.cover_image}
-                alt={listing.book.cover_alt || `${listing.book.title} מאת ${listing.book.author} — ספר יד שניה`}
-                className="w-24 h-36 object-cover rounded-lg shadow-sm hover:opacity-90 transition-opacity"
-              />
-            ) : (
-              <div className="w-24 h-36 bg-[#2a2a2a] rounded-lg flex items-center justify-center border border-[#3a3a3a] hover:opacity-90 transition-opacity">
-                <span className="text-3xl opacity-40">📕</span>
-              </div>
-            )}
-          </Link>
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <Link
-            href={`/books/${encodeURIComponent(titleToSlug(listing.book.title))}`}
-            className="font-semibold text-[#F0F0F0] hover:text-[#F5A623] transition-colors line-clamp-2 leading-snug block"
+    <div className={`bg-[#1e1e1e] rounded-2xl border overflow-hidden transition-all ${isSold ? "border-[#2a2a2a] opacity-60" : "border-[#2a2a2a]"}`}>
+      {/* Cover — full-width portrait image */}
+      <Link href={bookUrl} className="block overflow-hidden">
+        {listing.book.cover_image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={listing.book.cover_image}
+            alt={listing.book.cover_alt || `${listing.book.title} מאת ${listing.book.author} — ספר יד שניה`}
+            className="w-full object-cover hover:opacity-90 transition-opacity"
+            style={{ aspectRatio: "2/3", minHeight: "200px" }}
+          />
+        ) : (
+          <div
+            className="w-full bg-[#2a2a2a] flex items-center justify-center border-b border-[#3a3a3a]"
+            style={{ aspectRatio: "2/3", minHeight: "200px" }}
           >
-            {listing.book.title}
-          </Link>
-          <p className="text-sm text-[#888] mt-0.5 truncate">{listing.book.author}</p>
+            <span className="text-5xl opacity-30">📕</span>
+          </div>
+        )}
+      </Link>
 
-          <div className="flex items-center gap-2 mt-2 flex-wrap">
+      {/* Info */}
+      <div className="p-3">
+        <Link
+          href={bookUrl}
+          className="font-semibold text-[#F0F0F0] hover:text-[#F5A623] transition-colors line-clamp-2 text-sm leading-snug block mb-0.5"
+        >
+          {listing.book.title}
+        </Link>
+        <p className="text-xs text-[#888] truncate mb-2">{listing.book.author}</p>
+        <div className="flex items-center justify-between gap-1 flex-wrap">
+          <span className="text-base font-bold text-[#F5A623]">
+            {listing.price !== null ? `₪${listing.price}` : "חינם"}
+          </span>
+          <div className="flex items-center gap-1 flex-wrap justify-end">
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${conditionMap[listing.condition].color}`}>
               {conditionMap[listing.condition].label}
             </span>
@@ -265,10 +270,6 @@ function ListingCard({
               </span>
             )}
           </div>
-
-          <p className="mt-2 text-lg font-bold text-[#F5A623]">
-            {listing.price !== null ? `₪${listing.price}` : "חינם"}
-          </p>
         </div>
       </div>
 
@@ -450,7 +451,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
                 <h2 className="text-lg font-bold text-[#F0F0F0] mb-4">
                   למכירה ({available.length})
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {available.map((l: any) => (
                     <ListingCard
                       key={l.id}
@@ -472,7 +473,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
                 <h2 className="text-lg font-bold text-[#555] mb-4">
                   נמכרו ({sold.length})
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {sold.map((l: any) => (
                     <ListingCard
                       key={l.id}
