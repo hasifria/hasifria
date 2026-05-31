@@ -82,7 +82,7 @@ export default function HomeClient() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [geoCity, setGeoCity] = useState<string | null>(null);
   const cityRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const allCities = [...new Set([...ISRAELI_CITIES, ...dbCities])].sort((a, b) =>
     a.localeCompare(b, "he")
@@ -151,6 +151,7 @@ export default function HomeClient() {
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     const nextPage = page + 1;
+    console.log(`[HomeClient] Observer fired, loading page ${nextPage}`);
     const params = new URLSearchParams({ page: String(nextPage), limit: "12" });
     if (city && city !== "כל הארץ") params.set("city", city);
     fetch(`/api/listings/recent?${params}`)
@@ -159,21 +160,25 @@ export default function HomeClient() {
         setRecent((prev) => [...prev, ...(data.listings ?? [])]);
         setHasMore(data.hasMore ?? false);
         setPage(nextPage);
+        console.log(`[HomeClient] Loaded ${data.listings?.length ?? 0} more listings, hasMore: ${data.hasMore}`);
       })
       .catch(() => {})
       .finally(() => setIsLoadingMore(false));
   }, [isLoadingMore, hasMore, page, city]);
 
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(
+  // Callback ref — React calls this whenever the sentinel mounts/unmounts
+  // OR when loadMore/isLoading changes identity, ensuring the observer is
+  // always attached to the live element with a fresh closure.
+  const sentinelRef = useCallback((el: HTMLDivElement | null) => {
+    observerRef.current?.disconnect();
+    observerRef.current = null;
+    if (!el || isLoading) return;
+    observerRef.current = new IntersectionObserver(
       (entries) => { if (entries[0].isIntersecting) loadMore(); },
       { rootMargin: "300px" }
     );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [loadMore]);
+    observerRef.current.observe(el);
+  }, [loadMore, isLoading]);
 
   const measurePos = useCallback(() => {
     if (cityRef.current) {
@@ -358,18 +363,16 @@ export default function HomeClient() {
             </div>
           )}
 
-          {/* Infinite scroll sentinel */}
-          {!isLoading && (
-            <div ref={sentinelRef} className="flex justify-center py-6">
-              {isLoadingMore && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src="/logo-icon.png" alt="" width={32} height={32} className="animate-pulse opacity-60" />
-              )}
-              {!isLoadingMore && !hasMore && recent.length > 0 && (
-                <p className="text-[#555] text-sm">אין עוד ספרים להצגה</p>
-              )}
-            </div>
-          )}
+          {/* Infinite scroll sentinel — always in DOM so the callback ref fires */}
+          <div ref={sentinelRef} className="flex justify-center py-6">
+            {isLoadingMore && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src="/logo-icon.png" alt="" width={32} height={32} className="animate-pulse opacity-60" />
+            )}
+            {!isLoading && !isLoadingMore && !hasMore && recent.length > 0 && (
+              <p className="text-[#555] text-sm">אין עוד ספרים להצגה</p>
+            )}
+          </div>
         </section>
 
         {/* How it works */}

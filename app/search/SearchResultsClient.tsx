@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import LikeButton from "@/components/LikeButton";
 import { titleToSlug } from "@/lib/slug";
@@ -32,7 +32,7 @@ export default function SearchResultsClient({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [page, setPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const uniqueAuthors = q
     ? [...new Set(results.map((r) => r.author))].filter((a) =>
@@ -44,6 +44,7 @@ export default function SearchResultsClient({
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     const nextPage = page + 1;
+    console.log(`[SearchResults] Observer fired, loading page ${nextPage}`);
     const params = new URLSearchParams({ q, city, page: String(nextPage), limit: "12" });
     fetch(`/api/search?${params}`)
       .then((r) => r.json())
@@ -51,20 +52,21 @@ export default function SearchResultsClient({
         setResults((prev) => [...prev, ...(data.results ?? [])]);
         setHasMore(data.hasMore ?? false);
         setPage(nextPage);
+        console.log(`[SearchResults] Loaded ${data.results?.length ?? 0} more listings, hasMore: ${data.hasMore}`);
       })
       .catch(() => {})
       .finally(() => setIsLoadingMore(false));
   }, [isLoadingMore, hasMore, page, q, city]);
 
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(
+  const sentinelRef = useCallback((el: HTMLDivElement | null) => {
+    observerRef.current?.disconnect();
+    observerRef.current = null;
+    if (!el) return;
+    observerRef.current = new IntersectionObserver(
       (entries) => { if (entries[0].isIntersecting) loadMore(); },
       { rootMargin: "300px" }
     );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
+    observerRef.current.observe(el);
   }, [loadMore]);
 
   if (results.length === 0) {
