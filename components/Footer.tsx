@@ -31,11 +31,6 @@ export default function Footer() {
   return (
     <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] text-[#555] py-10 px-4">
       <div className="max-w-6xl mx-auto">
-        {/* Slogan */}
-        <p className="text-center text-[#888] text-sm font-medium mb-8">
-          ספרים יד שניה או למסירה קרוב לבית
-        </p>
-
         {/* Footer columns */}
         {parsedCols.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8 pb-8 border-b border-[#1a1a1a]">
@@ -63,7 +58,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
-          <p>© 2026 הספרייה — קנה ומכור ספרים יד שנייה בישראל</p>
+          <p>© 2026 הספריה — ספרים יד שניה או למסירה קרוב לביתך</p>
           <div className="flex items-center gap-4">
             <Link href="/terms" className="hover:text-[#F5A623] transition-colors">תנאי שימוש</Link>
             <Link href="/privacy" className="hover:text-[#F5A623] transition-colors">מדיניות פרטיות</Link>
