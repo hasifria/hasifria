@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+﻿import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { prisma } from "@/lib/db";
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       try {
         const client = twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!);
         await client.messages.create({
-          body: `הספרייה — לחץ לצילום עטיפת הספר: ${uploadUrl}`,
+          body: `הספריה — לחץ לצילום עטיפת הספר: ${uploadUrl}`,
           from: process.env.TWILIO_PHONE_NUMBER!,
           to: "+972" + user.phone.slice(1),
         });

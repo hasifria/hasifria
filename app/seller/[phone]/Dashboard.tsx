@@ -410,7 +410,7 @@ export default function Dashboard({ seller, isOwner }: { seller: Seller; isOwner
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0 flex-wrap justify-center md:justify-end">
-              <ShareButton title={`${seller.name ?? seller.phone} — הספרייה`} url={sellerPageUrl} />
+              <ShareButton title={`${seller.name ?? seller.phone} — הספריה`} url={sellerPageUrl} />
               {isOwner && (
                 <Link
                   href="/sell"

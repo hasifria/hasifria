@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       process.env.TWILIO_AUTH_TOKEN!
     );
     await client.messages.create({
-      body: `קוד האימות שלך להספרייה: ${otp}`,
+      body: `קוד האימות שלך להספריה: ${otp}`,
       from: process.env.TWILIO_PHONE_NUMBER!,
       to: toE164(phone),
     });

@@ -1,16 +1,16 @@
-import { prisma } from "./db";
+﻿import { prisma } from "./db";
 
 export const SEO_DEFAULTS = {
   home: {
-    title_template: "הספרייה — ספרים יד שנייה בישראל",
+    title_template: "הספריה — ספרים יד שנייה בישראל",
     description_template: "מצא ספרים יד שנייה ממוכרים פרטיים בכל רחבי ישראל. מחירים נוחים, מגוון עצום.",
   },
   book: {
-    title_template: "{title} מאת {author} — הספרייה",
+    title_template: "{title} מאת {author} — הספריה",
     description_template: "קנה את הספר {title} מאת {author} יד שנייה. מחיר החל מ-{price}₪ באזור {city}.",
   },
   author: {
-    title_template: "ספרים מאת {author} — הספרייה",
+    title_template: "ספרים מאת {author} — הספריה",
     description_template: "כל הספרים של {author} למכירה יד שנייה בישראל.",
   },
   image_defaults: {

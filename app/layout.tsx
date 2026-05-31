@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
 import "./globals.css";
 import AccessibilityWidget from "@/components/AccessibilityWidget";
@@ -9,7 +9,7 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "הספרייה - ספרים יד שנייה",
+  title: "הספריה - ספרים יד שנייה",
   description: "קנה ומכור ספרים יד שנייה בישראל. מצא ספרים במחירים נוחים ממוכרים פרטיים בכל רחבי הארץ.",
 };
 

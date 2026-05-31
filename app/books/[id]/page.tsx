@@ -17,7 +17,7 @@ const conditionMap = {
 
 function whatsappLink(phone: string, bookTitle: string) {
   const normalized = phone.replace(/\D/g, "").replace(/^0/, "972");
-  const text = encodeURIComponent(`היי, ראיתי את המודעה שלך על הספר "${bookTitle}" באתר הספרייה. האם הוא עדיין זמין?`);
+  const text = encodeURIComponent(`היי, ראיתי את המודעה שלך על הספר "${bookTitle}" באתר הספריה. האם הוא עדיין זמין?`);
   return `https://wa.me/${normalized}?text=${text}`;
 }
 
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
   });
-  if (!book) return { title: "ספר לא נמצא — הספרייה" };
+  if (!book) return { title: "ספר לא נמצא — הספריה" };
 
   const seo = await getSeoTemplates("book");
   const listing = book.listings[0];

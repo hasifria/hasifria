@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -126,7 +126,7 @@ function RegisterForm() {
                   <Link href="/terms" target="_blank" className="text-[#F5A623] hover:underline mx-1">תנאי השימוש</Link>
                   ול
                   <Link href="/privacy" target="_blank" className="text-[#F5A623] hover:underline mx-1">מדיניות הפרטיות</Link>
-                  של הספרייה. המידע שלך לא יועבר לצד שלישי ללא הסכמתך.
+                  של הספריה. המידע שלך לא יועבר לצד שלישי ללא הסכמתך.
                 </p>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <div
