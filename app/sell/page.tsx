@@ -520,9 +520,12 @@ function MobileSell() {
                         </div>
                       </div>
                       {manualError && <p className="text-sm text-red-400">{manualError}</p>}
+                      {!coverImage && (
+                        <p className="text-xs text-[#888] text-center">יש להעלות תמונה של הספר כדי להמשיך</p>
+                      )}
                       <div className="flex gap-2">
-                        <button type="button" onClick={confirmManual}
-                          className="flex-1 py-3 bg-[#F5A623] hover:bg-[#e0941a] text-black font-bold rounded-xl transition-colors">
+                        <button type="button" onClick={confirmManual} disabled={!coverImage}
+                          className={`flex-1 py-3 font-bold rounded-xl transition-colors ${coverImage ? "bg-[#F5A623] hover:bg-[#e0941a] text-black" : "bg-[#2a2a2a] text-[#555] cursor-not-allowed"}`}>
                           המשך לפרסום
                         </button>
                         <button type="button" onClick={resetToScan}

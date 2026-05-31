@@ -229,18 +229,20 @@ function ListingCard({
       <div className="flex gap-4 p-4">
         {/* Cover */}
         <div className="shrink-0">
-          {listing.book.cover_image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={listing.book.cover_image}
-              alt={listing.book.cover_alt || `${listing.book.title} מאת ${listing.book.author} — ספר יד שניה`}
-              className="w-16 h-24 object-cover rounded-lg shadow-sm"
-            />
-          ) : (
-            <div className="w-16 h-24 bg-[#2a2a2a] rounded-lg flex items-center justify-center border border-[#3a3a3a]">
-              <span className="text-2xl opacity-40">📕</span>
-            </div>
-          )}
+          <Link href={`/books/${encodeURIComponent(titleToSlug(listing.book.title))}`}>
+            {listing.book.cover_image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={listing.book.cover_image}
+                alt={listing.book.cover_alt || `${listing.book.title} מאת ${listing.book.author} — ספר יד שניה`}
+                className="w-24 h-36 object-cover rounded-lg shadow-sm hover:opacity-90 transition-opacity"
+              />
+            ) : (
+              <div className="w-24 h-36 bg-[#2a2a2a] rounded-lg flex items-center justify-center border border-[#3a3a3a] hover:opacity-90 transition-opacity">
+                <span className="text-3xl opacity-40">📕</span>
+              </div>
+            )}
+          </Link>
         </div>
 
         {/* Info */}

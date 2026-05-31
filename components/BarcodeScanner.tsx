@@ -83,6 +83,7 @@ export default function BarcodeScanner({
         ✕
       </button>
 
+      <p className="text-white text-base font-bold text-center py-3">נא לסרוק בסבלנות 😊</p>
       <div className="flex-1 relative overflow-hidden">
         <video ref={videoRef} className="w-full h-full object-cover" muted playsInline autoPlay />
         {/* Scan frame overlay */}

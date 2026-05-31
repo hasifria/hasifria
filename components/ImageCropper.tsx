@@ -118,7 +118,7 @@ export default function ImageCropper({
       <div className="bg-white rounded-2xl overflow-hidden w-full max-w-sm">
         <div className="p-4 border-b border-stone-200">
           <h3 className="font-bold text-stone-900 text-center">חתוך את התמונה</h3>
-          <p className="text-xs text-stone-400 text-center mt-1">גרור להזזה • צבוט/גלגלת לזום</p>
+          <p className="text-base font-bold text-stone-900 text-center mt-2 bg-amber-50 border border-amber-300 rounded-lg px-3 py-1.5">גרור להזזה • צבוט/גלגלת לזום</p>
         </div>
         <div className="flex justify-center py-4 bg-stone-100">
           <div ref={containerRef} className="relative overflow-hidden rounded-lg cursor-grab active:cursor-grabbing select-none" style={{ width: CROP_W, height: CROP_H, touchAction: "none" }}>
@@ -128,6 +128,9 @@ export default function ImageCropper({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img ref={imgRef} src={src} alt="crop" onLoad={handleImageLoad} draggable={false} className="absolute top-0 left-0 max-w-none pointer-events-none select-none" style={{ transformOrigin: "0 0", transform }} />
           </div>
+        </div>
+        <div className="px-4 pt-3 pb-1 text-center">
+          <p className="text-sm font-medium text-amber-600">נא להמתין 10 שניות עד שהתמונה עולה ואז ללחוץ</p>
         </div>
         <div className="p-4 flex gap-3">
           <button onClick={onCancel} className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-sm font-medium hover:bg-stone-50 transition-colors">ביטול</button>
