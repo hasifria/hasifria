@@ -9,11 +9,6 @@ import Footer from "@/components/Footer";
 import { getSeoTemplates, fillTemplate } from "@/lib/seo";
 import { titleToSlug } from "@/lib/slug";
 
-const conditionMap = {
-  new:  { label: "כמו חדש",  color: "bg-emerald-900/40 text-emerald-400" },
-  good: { label: "מצב טוב",  color: "bg-amber-900/40 text-amber-400" },
-  worn: { label: "מצב סביר", color: "bg-[#2a2a2a] text-[#888]" },
-};
 
 type Props = { params: Promise<{ name: string }> };
 
@@ -107,71 +102,52 @@ export default async function AuthorPage({ params }: Props) {
               </Link>
             </div>
           ) : (
-            <div className="space-y-10">
-              {booksWithListings.map((book: any) => (
-                <div key={book.id}>
-                  <div className="flex items-center gap-4 mb-5">
-                    <Link href={`/books/${encodeURIComponent(titleToSlug(book.title))}`} className="w-12 h-16 rounded-lg overflow-hidden shrink-0 bg-[#2a2a2a] flex items-center justify-center border border-[#3a3a3a] hover:opacity-90 transition-opacity">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {booksWithListings.map((book: any) => {
+                const lowestPrice = book.listings[0]?.price !== null ? Number(book.listings[0].price) : null;
+                const bookUrl = `/books/${encodeURIComponent(titleToSlug(book.title))}`;
+                return (
+                  <div key={book.id} className="relative bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] overflow-hidden group">
+                    <Link href={bookUrl} className="block overflow-hidden">
                       {book.cover_image ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={book.cover_image} alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שניה`} className="w-full h-full object-cover" />
+                        <img
+                          src={book.cover_image}
+                          alt={book.cover_alt || `${book.title} מאת ${book.author} — ספר יד שניה`}
+                          className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          style={{ aspectRatio: "2/3", minHeight: "200px" }}
+                        />
                       ) : (
-                        <span className="text-xl opacity-40">📕</span>
+                        <div
+                          className="w-full bg-[#2a2a2a] flex items-center justify-center"
+                          style={{ aspectRatio: "2/3", minHeight: "200px" }}
+                        >
+                          <span className="text-5xl opacity-30">📕</span>
+                        </div>
                       )}
                     </Link>
-                    <div>
+                    <div className="p-3">
                       <Link
-                        href={`/books/${encodeURIComponent(titleToSlug(book.title))}`}
-                        className="text-lg font-bold text-[#F0F0F0] hover:text-[#F5A623] transition-colors"
+                        href={bookUrl}
+                        className="font-semibold text-[#F0F0F0] hover:text-[#F5A623] transition-colors line-clamp-2 text-sm leading-snug block mb-1"
                       >
                         {book.title}
                       </Link>
-                      <p className="text-sm text-[#888] mt-0.5">
-                        {book.listings.length} {book.listings.length === 1 ? "מוכר" : "מוכרים"}
-                      </p>
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-base font-bold text-[#F5A623]">
+                          {lowestPrice !== null ? `₪${lowestPrice}` : "חינם"}
+                        </span>
+                        <span className="text-xs text-[#555]">
+                          {book.listings.length} {book.listings.length === 1 ? "מוכר" : "מוכרים"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="absolute top-2 left-2">
+                      <LikeButton listingId={book.listings[0].id} />
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {book.listings.map((listing: any) => (
-                      <div key={listing.id} className="relative bg-[#1e1e1e] rounded-2xl border border-[#2a2a2a] p-4 flex items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className="w-7 h-7 rounded-full bg-[#F5A623]/10 flex items-center justify-center text-xs font-bold text-[#F5A623] shrink-0">
-                              {(listing.seller.name ?? listing.seller.phone).charAt(0)}
-                            </div>
-                            <Link
-                              href={`/seller/${listing.seller.phone}`}
-                              className="text-sm font-medium text-[#F0F0F0] hover:text-[#F5A623] transition-colors truncate"
-                            >
-                              {listing.seller.name ?? listing.seller.phone}
-                            </Link>
-                          </div>
-                          {(listing.seller.address ?? listing.seller.city) && (
-                            <p className="text-xs text-[#555] mb-2 flex items-center gap-1">
-                              <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
-                              </svg>
-                              {listing.seller.address ?? listing.seller.city}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl font-bold text-[#F5A623]">
-                              {listing.price !== null ? `₪${Number(listing.price)}` : "חינם"}
-                            </span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${conditionMap[listing.condition as keyof typeof conditionMap].color}`}>
-                              {conditionMap[listing.condition as keyof typeof conditionMap].label}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="shrink-0">
-                          <LikeButton listingId={listing.id} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
