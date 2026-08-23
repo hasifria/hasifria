@@ -38,6 +38,10 @@ export async function POST(req: Request) {
       },
     });
 
+    if (user.is_blocked) {
+      return NextResponse.json({ error: "חשבון זה חסום. לפרטים פנה לתמיכה." }, { status: 403 });
+    }
+
     if (isRegistration) {
       sendNewUserEmail({
         name: user.name,

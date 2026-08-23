@@ -32,6 +32,7 @@ model User {
   city             String?
   created_at       DateTime  @default(now())
   terms_accepted_at DateTime?
+  is_blocked       Boolean   @default(false)
 
   listings   Listing[]
   likes      Like[]

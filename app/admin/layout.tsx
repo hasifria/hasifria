@@ -9,6 +9,7 @@ const ADMIN_TABS = [
   { href: "/admin/seo",      label: "SEO" },
   { href: "/admin/books",    label: "ספרים" },
   { href: "/admin/listings", label: "מודעות" },
+  { href: "/admin/users",    label: "משתמשים" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
