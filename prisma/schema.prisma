@@ -115,3 +115,13 @@ model SeoSetting {
 
   @@map("seo_settings")
 }
+
+// One row per AI cover-identification request; used for the per-user hourly rate limit.
+model AiIdentifyUsage {
+  id         String   @id @default(cuid())
+  user_id    String
+  created_at DateTime @default(now())
+
+  @@index([user_id, created_at])
+  @@map("ai_identify_usage")
+}
