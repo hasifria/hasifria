@@ -1,10 +1,8 @@
-import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "@/lib/session";
+import { getActiveSession } from "@/lib/activeSession";
 import { prisma } from "@/lib/db";
 
 async function getOwnerSession() {
-  return getIronSession<SessionData>(await cookies(), sessionOptions);
+  return getActiveSession();
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {

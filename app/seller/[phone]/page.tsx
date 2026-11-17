@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "@/lib/session";
+import { getActiveSession } from "@/lib/activeSession";
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
@@ -28,7 +26,7 @@ export default async function SellerPage({ params }: Props) {
 
   if (!seller) notFound();
 
-  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+  const session = await getActiveSession();
   const isOwner = session.userId === seller.id;
 
   const serialized = {
