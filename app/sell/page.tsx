@@ -29,9 +29,11 @@ type ResolvedBook = {
 type IdentifyResponse = {
   identified: { title: string; author: string; publisher: string | null; language: string; confidence: number };
   match: Book | null;
-  coverUrl: string;
+  coverUrl: string | null;
   uncertain: boolean;
   error?: string;
+  code?: string; // stable error code from the server, logged to the console only
+  warning?: string;
 };
 
 type Condition = "new" | "good" | "worn";
@@ -286,6 +288,14 @@ function SellFlow({ isMobile }: { isMobile: boolean }) {
 
     setCoverUploading(false);
 
+    // Diagnostic codes go to the browser console only, never to the seller.
+    if (!res) {
+      console.error("[books/identify] code=network_error");
+    } else if (!res.ok) {
+      console.error(`[books/identify] code=${data.code ?? "unknown"} status=${res.status}`);
+    }
+    if (data.warning) console.warn(`[books/identify] code=${data.warning}`);
+
     if (res?.status === 401) {
       router.replace("/register?redirect=/sell");
       return;
@@ -296,17 +306,24 @@ function SellFlow({ isMobile }: { isMobile: boolean }) {
       return;
     }
 
-    if (!res?.ok || !data.coverUrl) {
-      // Identification unavailable (rate limit, server error, offline): keep the photo
-      // locally as the cover (/api/listings uploads it) and let the seller type the details.
+    const failed = !res?.ok;
+    const id = data.identified;
+    const hasDetails = !!(data.match || id?.title || id?.author);
+
+    if (data.coverUrl) {
+      setCoverUrl(data.coverUrl);
+    } else {
+      // Upload failed or the request never completed: keep the photo locally as the
+      // cover (/api/listings uploads it with the listing).
       try { setCoverUrl(await blobToDataUrl(blob)); } catch {}
+    }
+
+    if (failed && !hasDetails) {
       setWarning(`${data.error ?? "הזיהוי האוטומטי לא זמין כרגע."} אנא מלא את פרטי הספר.`);
       setStep("form");
       return;
     }
 
-    setCoverUrl(data.coverUrl);
-    const id = data.identified;
     if (mode === "full") {
       if (data.match) {
         setMatch(data.match);
