@@ -1,6 +1,4 @@
-﻿import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "@/lib/session";
+﻿import { getActiveSession } from "@/lib/activeSession";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -15,7 +13,7 @@ const conditionLabel: Record<string, { label: string; color: string }> = {
 };
 
 export default async function LikedPage() {
-  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+  const session = await getActiveSession();
   if (!session.userId) {
     redirect("/register?redirect=/liked");
   }

@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "@/lib/session";
+import { getActiveSession } from "@/lib/activeSession";
 import { prisma } from "@/lib/db";
 
 export async function PATCH(request: Request) {
   try {
-    const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+    const session = await getActiveSession();
     if (!session.userId) return Response.json({ error: "לא מחובר" }, { status: 401 });
 
     const { name, city, address } = await request.json();

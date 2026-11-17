@@ -1,12 +1,10 @@
-import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "@/lib/session";
+import { getActiveSession } from "@/lib/activeSession";
 import { prisma } from "@/lib/db";
 import { uploadBookCover, isBase64Image } from "@/lib/cloudinary";
 
 export async function POST(req: Request) {
   try {
-    const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+    const session = await getActiveSession();
     if (!session.userId) {
       return Response.json({ error: "יש להתחבר תחילה" }, { status: 401 });
     }
